@@ -16,6 +16,9 @@
 		E4126D7E2B126BDB0046F233 /* GymTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4126D7D2B126BDB0046F233 /* GymTrackerTests.swift */; };
 		E4126D882B126BDB0046F233 /* GymTrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4126D872B126BDB0046F233 /* GymTrackerUITests.swift */; };
 		E4126D8A2B126BDB0046F233 /* GymTrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4126D892B126BDB0046F233 /* GymTrackerUITestsLaunchTests.swift */; };
+		E4126D972B126C1E0046F233 /* SecondView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4126D962B126C1E0046F233 /* SecondView.swift */; };
+		E4126D992B1274420046F233 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4126D982B1274420046F233 /* InputView.swift */; };
+		E4A1902D2B1C32CF00C03E9D /* NewWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A1902C2B1C32CF00C03E9D /* NewWorkoutView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +51,9 @@
 		E4126D832B126BDB0046F233 /* GymTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GymTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4126D872B126BDB0046F233 /* GymTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTrackerUITests.swift; sourceTree = "<group>"; };
 		E4126D892B126BDB0046F233 /* GymTrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		E4126D962B126C1E0046F233 /* SecondView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondView.swift; sourceTree = "<group>"; };
+		E4126D982B1274420046F233 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
+		E4A1902C2B1C32CF00C03E9D /* NewWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewWorkoutView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,8 +108,11 @@
 				E4126D692B126BDA0046F233 /* ContentView.swift */,
 				E4126D6B2B126BDB0046F233 /* Assets.xcassets */,
 				E4126D702B126BDB0046F233 /* Persistence.swift */,
+				E4126D962B126C1E0046F233 /* SecondView.swift */,
 				E4126D722B126BDB0046F233 /* GymTracker.xcdatamodeld */,
 				E4126D6D2B126BDB0046F233 /* Preview Content */,
+				E4126D982B1274420046F233 /* InputView.swift */,
+				E4A1902C2B1C32CF00C03E9D /* NewWorkoutView.swift */,
 			);
 			path = GymTracker;
 			sourceTree = "<group>";
@@ -197,7 +206,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1340;
-				LastUpgradeCheck = 1340;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					E4126D632B126BDA0046F233 = {
 						CreatedOnToolsVersion = 13.4.1;
@@ -264,8 +273,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4126D742B126BDB0046F233 /* GymTracker.xcdatamodeld in Sources */,
+				E4126D972B126C1E0046F233 /* SecondView.swift in Sources */,
 				E4126D712B126BDB0046F233 /* Persistence.swift in Sources */,
+				E4126D992B1274420046F233 /* InputView.swift in Sources */,
 				E4126D6A2B126BDA0046F233 /* ContentView.swift in Sources */,
+				E4A1902D2B1C32CF00C03E9D /* NewWorkoutView.swift in Sources */,
 				E4126D682B126BDA0046F233 /* GymTrackerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -339,6 +351,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -399,6 +412,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -433,6 +447,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -462,6 +477,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
