@@ -8,11 +8,32 @@
 import SwiftUI
 
 struct ExerciseRowView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+    var name: String
+        var sets: Int
+        var reps: Int
+
+        var body: some View {
+            HStack {
+                VStack {
+                    HStack {
+                        VStack (alignment: .leading) {
+                            
+                                Text("\(name)")
+                                    .fontWeight(.bold)
+                                Text("\(sets) sets x \(reps) reps")
+                                
+                            
+                        }
+                        Spacer()
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding()
+            
+        }
 }
 
 #Preview {
-    ExerciseRowView()
+    ExerciseRowView(name: "Anwar", sets: 3, reps: 12)
 }
