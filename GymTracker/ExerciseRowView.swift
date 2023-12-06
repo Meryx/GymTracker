@@ -9,8 +9,9 @@ import SwiftUI
 
 struct ExerciseRowView: View {
     var name: String
-        var sets: Int
-        var reps: Int
+    var sets: Int
+    var reps: Int
+    var kg: Int
 
         var body: some View {
             HStack {
@@ -20,7 +21,7 @@ struct ExerciseRowView: View {
                             
                                 Text("\(name)")
                                     .fontWeight(.bold)
-                                Text("\(sets) sets x \(reps) reps")
+                                Text("\(sets) sets x \(reps) reps x \(kg) kg")
                                 
                             
                         }
@@ -35,5 +36,5 @@ struct ExerciseRowView: View {
 }
 
 #Preview {
-    ExerciseRowView(name: "Anwar", sets: 3, reps: 12)
+    ExerciseRowView(name: "Anwar", sets: 3, reps: 12, kg: 5)
 }

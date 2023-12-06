@@ -12,6 +12,7 @@ import SwiftUI
 struct NewWorkoutView: View {
     @State private var showBottomSheet = false
     @State private var showPrompt = false
+    @State private var showList = true
     @ObservedObject var viewModel: ExerciseListModel
     
     @State private var position: CGFloat = 0.0
@@ -20,15 +21,33 @@ struct NewWorkoutView: View {
     @State private var name: String = ""
     @State private var sets: String = ""
     @State private var reps: String = ""
+    @State private var kg: String = ""
     
     struct prompt: View {
         @Binding var name: String
         @Binding var sets: String
         @Binding var reps: String
+        @Binding var kg: String
+        @Binding var showPrompt: Bool
+        @Binding var showList: Bool
+        @ObservedObject var viewModel: ExerciseListModel
+        
+        func handleOKClick() {
+            viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
+            showPrompt = false
+            showList.toggle()
+        }
+        
+        func handleCancelClick() {
+            showPrompt = false
+            showList.toggle()
+        }
+
         var body: some View {
-            VStack {
+            VStack (alignment: .leading) {
                 HStack {
                     Text("Name")
+                        .frame(width: 60, alignment: .leading)
                     TextField("Exercise Name", text: $name)
                         .textFieldStyle(.roundedBorder)
                         .font(.callout)
@@ -38,6 +57,7 @@ struct NewWorkoutView: View {
                 }
                 HStack {
                     Text("Sets")
+                        .frame(width: 60, alignment: .leading)
                     TextField("Sets", text: $sets)
                         .textFieldStyle(.roundedBorder)
                         .font(.callout)
@@ -47,6 +67,7 @@ struct NewWorkoutView: View {
                 }
                 HStack {
                     Text("Reps")
+                        .frame(width: 60, alignment: .leading)
                     TextField("Reps", text: $reps)
                         .textFieldStyle(.roundedBorder)
                         .font(.callout)
@@ -54,24 +75,63 @@ struct NewWorkoutView: View {
                         .frame(maxWidth: 300)
                         .cornerRadius(40)
                 }
+                HStack {
+                    Text("Weight")
+                        .frame(width: 60, alignment: .leading)
+                    TextField("Weight in kg", text: $kg)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.callout)
+                        .padding()
+                        .frame(maxWidth: 300)
+                        .cornerRadius(40)
+                }
+                Button (action: handleOKClick) {
+                    Text("OK")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.bold)
+                }
+                .buttonStyle(.bordered)
+                .padding(.top)
+                .padding(.leading)
+                .padding(.trailing)
+                .padding(.bottom, 0)
+                Button (action: handleCancelClick) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.bold)
+                }
+                .buttonStyle(.bordered)
+                .padding(.top)
+                .padding(.leading)
+                .padding(.trailing)
+                .padding(.bottom, 0)
             }
+            .padding()
+            .frame(width: UIScreen.main.bounds.width * 0.95)
+            .background(.white)
+            .cornerRadius(15)
         }
     }
     
     
     
     func handleAddExerciseClick() {
-//        viewModel.addItem(name: "Anwar", sets: 1, reps: 12)
-//        showPrompt = true
         showPrompt.toggle()
+        showList.toggle()
     }
     func handleCancelExerciseClick() {
         dimOpacity = 0
         self.showBottomSheet.toggle()
+        showPrompt = false
+        showList = true
+
     }
     func handleSaveWorkoutClick() {
-        viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!)
+//        viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
+        print("save")
         showPrompt = false
+        showList.toggle()
+
     }
     var body: some View {
         ZStack {
@@ -93,11 +153,13 @@ struct NewWorkoutView: View {
                                 handleSaveWorkout: self.handleSaveWorkoutClick,
                                 exercises: self.viewModel,
                                 positionVar: $position,
-                                dimOpacityVar: $dimOpacity)
+                                dimOpacityVar: $dimOpacity,
+                                showList: $showList,
+                                showPrompt: $showPrompt)
 
                         }
             if showPrompt {
-                prompt(name: $name, sets: $sets, reps: $reps)
+                prompt(name: $name, sets: $sets, reps: $reps, kg: $kg, showPrompt: $showPrompt, showList: $showList, viewModel: viewModel)
             }
             
         }
@@ -123,6 +185,8 @@ struct NewWorkoutView: View {
         @ObservedObject var exercises: ExerciseListModel
         @Binding var positionVar: CGFloat
         @Binding var dimOpacityVar: Double
+        @Binding var showList: Bool
+        @Binding var showPrompt: Bool
         @State private var rectHeight: CGFloat = 0.75
         @State private var dragOffset = CGSize.zero
         @State private var totalDrag: CGFloat = 0.0
@@ -134,7 +198,7 @@ struct NewWorkoutView: View {
                     .background(.red)
                 ZStack {
                     Rectangle()
-                        .fill(Color.white)
+                        .fill(Color.white.opacity(showPrompt ? 0.5 : 1.0))
                     .shadow(radius: 10)
                     VStack {
                         BottomSheetHandle()
@@ -178,7 +242,12 @@ struct NewWorkoutView: View {
                         .padding(.leading)
                         .padding(.trailing)
                         .padding(.bottom, 0)
-                        ExerciseList(viewModel: exercises)
+                        if showList {
+                            ExerciseList(viewModel: exercises)
+                        } else {
+                            Spacer()
+                                .frame(maxHeight: .infinity)
+                        }
                         HStack {
                             Button (action: handleSaveWorkout) {
                                 Text("Save")
