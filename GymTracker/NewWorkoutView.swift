@@ -22,6 +22,7 @@ struct NewWorkoutView: View {
     @State private var sets: String = ""
     @State private var reps: String = ""
     @State private var kg: String = ""
+
     
     struct prompt: View {
         @Binding var name: String
@@ -33,7 +34,7 @@ struct NewWorkoutView: View {
         @ObservedObject var viewModel: ExerciseListModel
         
         func handleOKClick() {
-            viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
+            viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!, setsText: "", repsText: "", kgText: "")
             showPrompt = false
             showList.toggle()
         }
@@ -129,8 +130,8 @@ struct NewWorkoutView: View {
     func handleSaveWorkoutClick() {
 //        viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
         print("save")
-        showPrompt = false
-        showList.toggle()
+//        showPrompt = false
+//        showList.toggle()
 
     }
     var body: some View {
