@@ -31,16 +31,13 @@ class ExerciseListModel: ObservableObject {
 
 
 struct ExerciseList: View {
-    @StateObject var viewModel = ExerciseListModel()
+    @StateObject var viewModel: ExerciseListModel
+    @ObservedObject var viewModel2: ExerciseRowDetailsModel
     var body: some View {
         NavigationView {
                 List(viewModel.items) { item in
-                    ExerciseRowView(name: item.name, sets: item.sets, reps: item.reps, kg: item.kg, setsText: item.setsText, kgText: item.kgText, repsText: item.repsText)
+                    ExerciseRowView(name: item.name, sets: item.sets, reps: item.reps, kg: item.kg, setsText: item.setsText, kgText: item.kgText, repsText: item.repsText, ExerciseDetailsModel: viewModel2)
             }
         }
     }
-}
-
-#Preview {
-    ExerciseList()
 }
