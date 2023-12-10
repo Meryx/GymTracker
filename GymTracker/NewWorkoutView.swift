@@ -14,7 +14,6 @@ struct NewWorkoutView: View {
     @State private var showPrompt = false
     @State private var showList = true
     @ObservedObject var viewModel: ExerciseListModel
-    @ObservedObject var viewModel2: ExerciseRowDetailsModel
     
     
     @State private var position: CGFloat = 0.0
@@ -155,7 +154,6 @@ struct NewWorkoutView: View {
                                 handleCancelExercise: self.handleCancelExerciseClick,
                                 handleSaveWorkout: self.handleSaveWorkoutClick,
                                 exercises: self.viewModel,
-                                viewModel2: self.viewModel2,
                                 positionVar: $position,
                                 dimOpacityVar: $dimOpacity,
                                 showList: $showList,
@@ -187,7 +185,6 @@ struct NewWorkoutView: View {
         let handleCancelExercise: () -> Void
         let handleSaveWorkout: () -> Void
         @ObservedObject var exercises: ExerciseListModel
-        @ObservedObject var viewModel2: ExerciseRowDetailsModel
         @Binding var positionVar: CGFloat
         @Binding var dimOpacityVar: Double
         @Binding var showList: Bool
@@ -248,7 +245,7 @@ struct NewWorkoutView: View {
                         .padding(.trailing)
                         .padding(.bottom, 0)
                         if showList {
-                            ExerciseList(viewModel: exercises, viewModel2: viewModel2)
+                            ExerciseList(viewModel: exercises)
                         } else {
                             Spacer()
                                 .frame(maxHeight: .infinity)
@@ -296,5 +293,5 @@ struct NewWorkoutView: View {
 }
 
 #Preview {
-    NewWorkoutView(viewModel: ExerciseListModel(), viewModel2: ExerciseRowDetailsModel())
+    NewWorkoutView(viewModel: ExerciseListModel())
 }

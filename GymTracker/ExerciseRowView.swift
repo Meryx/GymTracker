@@ -21,30 +21,30 @@ class ExerciseRowDetailsModel: ObservableObject {
     func addItem(setsText: String, repsText: String, kgText: String) {
         let newItem = ExerciseRowDetailsItem(setsText: setsText, repsText: repsText, kgText: kgText)
         items2.append(newItem)
-        print(items2)
     }
 }
 
 struct ExerciseRowDetailsList: View {
-    @StateObject var viewModel: ExerciseRowDetailsModel
-    @State private var listKey = UUID()
+    @ObservedObject var viewModel: ExerciseRowDetailsModel
+    @State var counter = 1
     var body: some View {
         VStack {
 
-                    List(viewModel.items2) { item in
-                        ExerciseRowDetails(setsText: item.setsText, kgText: item.kgText, repsText: item.repsText)
+                    List {
+                        ForEach(viewModel.items2) {item in
+                            ExerciseRowDetails(setsText: item.setsText, kgText: item.kgText, repsText: item.repsText)
+                                .listRowInsets(EdgeInsets())
+                        }
                 }
-            
-            .navigationTitle("Title")
+                    .listStyle(PlainListStyle())
             Button(action: {
-                viewModel.addItem(setsText: "11", repsText: "1", kgText: "1")
-                print("hello")
-                listKey = UUID()
+                viewModel.addItem(setsText: "\(counter) ", repsText: "", kgText: "")
+                self.counter+=1
             }) {
                 Text("+")
             }
         }
-        .frame(height: 300)
+        .frame(height: 220)
     }
 }
 
@@ -55,30 +55,26 @@ struct ExerciseRowDetails: View {
     var body: some View {
         HStack {
             TextField("", text: $setsText)
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .fontWeight(.bold)
-                .padding([.trailing])
-                .padding(.leading, 35)
+                .frame(width: 30)
+                .padding(.leading, 20)
                 .background(.gray.opacity(0.5))
                             .cornerRadius(10)
                 
             TextField("", text: $kgText)
-                .frame(maxWidth: .infinity, alignment: .center)
                 .fontWeight(.bold)
-                .padding([.trailing])
-                .padding(.leading, 35)
+                .frame(width: 80)
+                .padding([.leading])
                 .background(.gray.opacity(0.5))
                             .cornerRadius(10)
             TextField("", text: $repsText)
-                .frame(maxWidth: .infinity, alignment: .trailing)
                 .fontWeight(.bold)
-                .padding([.trailing])
-                .padding(.leading, 35)
+                .frame(width: 80)
+                .padding([.leading])
                 .background(.gray.opacity(0.5))
                             .cornerRadius(10)
 
         }
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -92,68 +88,29 @@ struct ExerciseRowView: View {
     @State var repsText: String
     @ObservedObject var ExerciseDetailsModel: ExerciseRowDetailsModel
 
-        var body: some View {
-            HStack {
-                VStack {
+    var body: some View {
+            VStack(alignment: .leading) {
+                        
+                    Text("\(name)")
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                        
                     HStack {
-                        VStack (alignment: .leading) {
-                            
-                                Text("\(name)")
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.blue)
-//                                Text("\(sets) sets x \(reps) reps x \(kg) kg")
-                            HStack {
-                                Text("Set")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .fontWeight(.bold)
-                                    .padding([.leading, .trailing])
-                                Text("kg")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .fontWeight(.bold)
-                                Text("Reps")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .fontWeight(.bold)
-
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-//                            HStack {
-//                                TextField("", text: $setsText)
-//                                    .frame(maxWidth: .infinity, alignment: .leading)
-//                                    .fontWeight(.bold)
-//                                    .padding([.trailing])
-//                                    .padding(.leading, 35)
-//                                    .background(.gray.opacity(0.5))
-//                                                .cornerRadius(10)
-//                                    
-//                                TextField("", text: $kgText)
-//                                    .frame(maxWidth: .infinity, alignment: .center)
-//                                    .fontWeight(.bold)
-//                                    .padding([.trailing])
-//                                    .padding(.leading, 35)
-//                                    .background(.gray.opacity(0.5))
-//                                                .cornerRadius(10)
-//                                TextField("", text: $repsText)
-//                                    .frame(maxWidth: .infinity, alignment: .trailing)
-//                                    .fontWeight(.bold)
-//                                    .padding([.trailing])
-//                                    .padding(.leading, 35)
-//                                    .background(.gray.opacity(0.5))
-//                                                .cornerRadius(10)
-//
-//                            }
-//                            .frame(maxWidth: .infinity)
-                            ExerciseRowDetailsList(viewModel: ExerciseDetailsModel)
-                            
-                        }
-                        Spacer()
+                        Text("Set")
+                            .fontWeight(.bold)
+                            .frame(width: 30, alignment: .leading)
+                            .padding(.trailing, 20)
+                        Text("kg")
+                            .fontWeight(.bold)
+                            .frame(width: 80, alignment: .leading)
+                            .padding([.trailing])
+                        Text("Reps")
+                            .fontWeight(.bold)
+                            .frame(width: 80, alignment: .leading)
                     }
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .padding()
-            
+                    ExerciseRowDetailsList(viewModel: ExerciseDetailsModel)
         }
+    }
 }
 
 #Preview {
