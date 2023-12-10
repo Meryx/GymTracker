@@ -10,21 +10,15 @@ import SwiftUI
 struct ListItem: Identifiable {
     let id = UUID()
     var name: String
-    var sets: Int
-    var reps: Int
-    var kg: Int
-    var setsText: String
-    var repsText: String
-    var kgText: String
     var row: ExerciseRowDetailsModel
-
+    
 }
 
 class ExerciseListModel: ObservableObject {
     @Published var items: [ListItem] = []
-
-    func addItem(name: String, sets: Int, reps: Int, kg: Int, setsText: String, repsText: String, kgText: String) {
-        let newItem = ListItem(name: name, sets: sets, reps: reps, kg: kg, setsText: setsText, repsText: repsText, kgText: kgText, row: ExerciseRowDetailsModel())
+    
+    func addItem(name: String) {
+        let newItem = ListItem(name: name, row: ExerciseRowDetailsModel())
         items.append(newItem)
     }
 }
@@ -33,10 +27,11 @@ class ExerciseListModel: ObservableObject {
 
 struct ExerciseList: View {
     @StateObject var viewModel: ExerciseListModel
+    @ObservedObject var exerciseModel: ExerciseViewModel
     var body: some View {
         NavigationView {
-                List(viewModel.items) { item in
-                    ExerciseRowView(name: item.name, sets: item.sets, reps: item.reps, kg: item.kg, setsText: item.setsText, kgText: item.kgText, repsText: item.repsText, ExerciseDetailsModel: item.row)
+            List(viewModel.items) { item in
+                ExerciseRowView(name: item.name, ExerciseDetailsModel: item.row, exerciseModel: exerciseModel)
             }
         }
         .frame(maxWidth: .infinity)

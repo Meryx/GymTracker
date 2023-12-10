@@ -12,12 +12,12 @@ struct ExerciseRowDetailsItem: Identifiable {
     var setsText: String
     var repsText: String
     var kgText: String
-
+    
 }
 
 class ExerciseRowDetailsModel: ObservableObject {
     @Published var items2: [ExerciseRowDetailsItem] = []
-
+    
     func addItem(setsText: String, repsText: String, kgText: String) {
         let newItem = ExerciseRowDetailsItem(setsText: setsText, repsText: repsText, kgText: kgText)
         items2.append(newItem)
@@ -26,19 +26,21 @@ class ExerciseRowDetailsModel: ObservableObject {
 
 struct ExerciseRowDetailsList: View {
     @ObservedObject var viewModel: ExerciseRowDetailsModel
+    @ObservedObject var exerciseModel: ExerciseViewModel
     @State var counter = 1
     var body: some View {
         VStack {
-
-                    List {
-                        ForEach(viewModel.items2) {item in
-                            ExerciseRowDetails(setsText: item.setsText, kgText: item.kgText, repsText: item.repsText)
-                                .listRowInsets(EdgeInsets())
-                        }
+            
+            List {
+                ForEach(viewModel.items2) {item in
+                    ExerciseRowDetails(setsText: item.setsText, kgText: item.kgText, repsText: item.repsText)
+                        .listRowInsets(EdgeInsets())
                 }
-                    .listStyle(PlainListStyle())
+            }
+            .listStyle(PlainListStyle())
             Button(action: {
                 viewModel.addItem(setsText: "\(counter) ", repsText: "", kgText: "")
+                exerciseModel.data.name = "Hello"
                 self.counter+=1
             }) {
                 Text("+")
@@ -59,60 +61,57 @@ struct ExerciseRowDetails: View {
                 .frame(width: 30)
                 .padding(.leading, 20)
                 .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
-                
+                .cornerRadius(10)
+                .disabled(true)
+            
             TextField("", text: $kgText)
                 .fontWeight(.bold)
                 .frame(width: 80)
                 .padding([.leading])
                 .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
+                .cornerRadius(10)
             TextField("", text: $repsText)
                 .fontWeight(.bold)
                 .frame(width: 80)
                 .padding([.leading])
                 .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
-
+                .cornerRadius(10)
+            
         }
     }
 }
 
 struct ExerciseRowView: View {
     var name: String
-    var sets: Int
-    var reps: Int
-    var kg: Int
-    @State var setsText: String
-    @State var kgText: String
-    @State var repsText: String
     @ObservedObject var ExerciseDetailsModel: ExerciseRowDetailsModel
-
+    @ObservedObject var exerciseModel: ExerciseViewModel
+    
     var body: some View {
-            VStack(alignment: .leading) {
-                        
-                    Text("\(name)")
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                        
-                    HStack {
-                        Text("Set")
-                            .fontWeight(.bold)
-                            .frame(width: 30, alignment: .leading)
-                            .padding(.trailing, 20)
-                        Text("kg")
-                            .fontWeight(.bold)
-                            .frame(width: 80, alignment: .leading)
-                            .padding([.trailing])
-                        Text("Reps")
-                            .fontWeight(.bold)
-                            .frame(width: 80, alignment: .leading)
-                    }
-                    ExerciseRowDetailsList(viewModel: ExerciseDetailsModel)
+        VStack(alignment: .leading) {
+            
+            Text("\(name)")
+                .fontWeight(.bold)
+                .foregroundColor(.blue)
+            
+            HStack {
+                Text("Set")
+                    .fontWeight(.bold)
+                    .frame(width: 30, alignment: .leading)
+                    .padding(.trailing, 20)
+                Text("kg")
+                    .fontWeight(.bold)
+                    .frame(width: 80, alignment: .leading)
+                    .padding([.trailing])
+                Text("Reps")
+                    .fontWeight(.bold)
+                    .frame(width: 80, alignment: .leading)
+            }
+            ExerciseRowDetailsList(viewModel: ExerciseDetailsModel, exerciseModel: exerciseModel)
         }
     }
 }
 
-#Preview {
-    ExerciseRowView(name: "Anwar", sets: 3, reps: 12, kg: 5, setsText: "1", kgText: "100", repsText: "5", ExerciseDetailsModel: ExerciseRowDetailsModel())
-}
+//#Preview {
+//    ExerciseRowView(name: "Squat", ExerciseDetailsModel: ExerciseRowDetailsModel(), exerciseModel)
+//}
+

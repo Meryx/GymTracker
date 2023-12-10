@@ -7,6 +7,45 @@
 
 import SwiftUI
 
+struct setDataModel: Codable {
+    var kg: String
+    var reps: String
+}
+
+struct ExerciseDataModel: Codable {
+    var name: String = ""
+    var sets: [setDataModel] = []
+}
+
+class ExerciseViewModel: ObservableObject {
+    @Published var data = ExerciseDataModel()
+    
+    func saveToPlist() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(self.data)
+            try data.write(to: self.plistURL(), options: .atomic)
+        } catch {
+            print("error \(error)")
+        }
+    }
+    
+    func loadFromPlist() {
+        let decoder = PropertyListDecoder()
+        do {
+            let data = try Data(contentsOf: self.plistURL())
+            self.data = try decoder.decode(ExerciseDataModel.self, from: data)
+        } catch {
+            print("error \(error)")
+        }
+    }
+    
+    private func plistURL() -> URL {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return documentsDirectory.appendingPathComponent("ExerciseDataModel.plist")
+    }
+}
+
 
 
 struct NewWorkoutView: View {
@@ -14,6 +53,7 @@ struct NewWorkoutView: View {
     @State private var showPrompt = false
     @State private var showList = true
     @ObservedObject var viewModel: ExerciseListModel
+    @StateObject var exerciseDataModel = ExerciseViewModel()
     
     
     @State private var position: CGFloat = 0.0
@@ -23,7 +63,7 @@ struct NewWorkoutView: View {
     @State private var sets: String = ""
     @State private var reps: String = ""
     @State private var kg: String = ""
-
+    
     
     struct prompt: View {
         @Binding var name: String
@@ -35,7 +75,7 @@ struct NewWorkoutView: View {
         @ObservedObject var viewModel: ExerciseListModel
         
         func handleOKClick() {
-            viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!, setsText: "", repsText: "", kgText: "")
+            viewModel.addItem(name: name)
             showPrompt = false
             showList.toggle()
         }
@@ -44,43 +84,13 @@ struct NewWorkoutView: View {
             showPrompt = false
             showList.toggle()
         }
-
+        
         var body: some View {
             VStack (alignment: .leading) {
                 HStack {
                     Text("Name")
                         .frame(width: 60, alignment: .leading)
                     TextField("Exercise Name", text: $name)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.callout)
-                        .padding()
-                        .frame(maxWidth: 300)
-                        .cornerRadius(40)
-                }
-                HStack {
-                    Text("Sets")
-                        .frame(width: 60, alignment: .leading)
-                    TextField("Sets", text: $sets)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.callout)
-                        .padding()
-                        .frame(maxWidth: 300)
-                        .cornerRadius(40)
-                }
-                HStack {
-                    Text("Reps")
-                        .frame(width: 60, alignment: .leading)
-                    TextField("Reps", text: $reps)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.callout)
-                        .padding()
-                        .frame(maxWidth: 300)
-                        .cornerRadius(40)
-                }
-                HStack {
-                    Text("Weight")
-                        .frame(width: 60, alignment: .leading)
-                    TextField("Weight in kg", text: $kg)
                         .textFieldStyle(.roundedBorder)
                         .font(.callout)
                         .padding()
@@ -126,14 +136,14 @@ struct NewWorkoutView: View {
         self.showBottomSheet.toggle()
         showPrompt = false
         showList = true
-
+        
     }
     func handleSaveWorkoutClick() {
-//        viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
+        //        viewModel.addItem(name: name, sets: Int(sets)!, reps: Int(reps)!, kg: Int(kg)!)
         print("save")
-//        showPrompt = false
-//        showList.toggle()
-
+        //        showPrompt = false
+        //        showList.toggle()
+        
     }
     var body: some View {
         ZStack {
@@ -144,7 +154,7 @@ struct NewWorkoutView: View {
                         .fontWeight(.bold)
                 }
                 .buttonStyle(.borderedProminent)
-            .padding()
+                .padding()
                 Spacer()
             }
             .overlay(Color.black.opacity(dimOpacity))
@@ -154,19 +164,20 @@ struct NewWorkoutView: View {
                                 handleCancelExercise: self.handleCancelExerciseClick,
                                 handleSaveWorkout: self.handleSaveWorkoutClick,
                                 exercises: self.viewModel,
+                                exerciseDataModel: exerciseDataModel,
                                 positionVar: $position,
                                 dimOpacityVar: $dimOpacity,
                                 showList: $showList,
                                 showPrompt: $showPrompt)
-
-                        }
+                
+            }
             if showPrompt {
                 prompt(name: $name, sets: $sets, reps: $reps, kg: $kg, showPrompt: $showPrompt, showList: $showList, viewModel: viewModel)
             }
             
         }
         .background(Color.white)
-
+        
     }
     
     struct BottomSheetHandle: View {
@@ -185,6 +196,7 @@ struct NewWorkoutView: View {
         let handleCancelExercise: () -> Void
         let handleSaveWorkout: () -> Void
         @ObservedObject var exercises: ExerciseListModel
+        @ObservedObject var exerciseDataModel: ExerciseViewModel
         @Binding var positionVar: CGFloat
         @Binding var dimOpacityVar: Double
         @Binding var showList: Bool
@@ -192,7 +204,7 @@ struct NewWorkoutView: View {
         @State private var rectHeight: CGFloat = 0.75
         @State private var dragOffset = CGSize.zero
         @State private var totalDrag: CGFloat = 0.0
-
+        
         
         var body: some View {
             VStack {
@@ -201,7 +213,7 @@ struct NewWorkoutView: View {
                 ZStack {
                     Rectangle()
                         .fill(Color.white.opacity(showPrompt ? 0.5 : 1.0))
-                    .shadow(radius: 10)
+                        .shadow(radius: 10)
                     VStack {
                         BottomSheetHandle()
                             .gesture(
@@ -210,30 +222,30 @@ struct NewWorkoutView: View {
                                         let dragAmount = value.translation.height
                                         totalDrag += dragAmount
                                         if dragAmount > 0 || rectHeight < 0.75 {
-                                                                    self.dragOffset.height = totalDrag
+                                            self.dragOffset.height = totalDrag
                                             rectHeight -= dragAmount / 600
-                                                                } else {
-                                                                    self.dragOffset.height = 0
-                                                                }
+                                        } else {
+                                            self.dragOffset.height = 0
+                                        }
                                     }
                                     .onEnded { _ in
                                         totalDrag = 0.0
                                         let referenceViewHeight = UIScreen.main.bounds.height * 0.75
                                         withAnimation {
-                                                                    // Check if drag exceeds 50% of the reference view's height
-                                                                    if self.dragOffset.height > referenceViewHeight / 3 {
-                                                                        rectHeight = 0.15
-                                                                        dimOpacityVar = 0.0
-                                                                    } else {
-                                                                        rectHeight = 0.75
-                                                                        dimOpacityVar = 0.5
-                                                                    }
-                                                                }
+                                            // Check if drag exceeds 50% of the reference view's height
+                                            if self.dragOffset.height > referenceViewHeight / 3 {
+                                                rectHeight = 0.15
+                                                dimOpacityVar = 0.0
+                                            } else {
+                                                rectHeight = 0.75
+                                                dimOpacityVar = 0.5
+                                            }
+                                        }
                                     }
                             )
-//                            .onTapGesture {
-//                                rectHeight = rectHeight > 0.20 ? 0.15 : 0.75
-//                            }
+                        //                            .onTapGesture {
+                        //                                rectHeight = rectHeight > 0.20 ? 0.15 : 0.75
+                        //                            }
                         Button (action: handleAddExercise) {
                             Text("+ Add Exercise")
                                 .frame(maxWidth: .infinity)
@@ -245,7 +257,7 @@ struct NewWorkoutView: View {
                         .padding(.trailing)
                         .padding(.bottom, 0)
                         if showList {
-                            ExerciseList(viewModel: exercises)
+                            ExerciseList(viewModel: exercises, exerciseModel: exerciseDataModel)
                         } else {
                             Spacer()
                                 .frame(maxHeight: .infinity)
@@ -256,12 +268,12 @@ struct NewWorkoutView: View {
                                     .frame(maxWidth: .infinity)
                                     .fontWeight(.bold)
                                     .frame(height: 35)
-                                    
+                                
                             }
                             .foregroundColor(.green)
                             .background(.green.opacity(0.2))
                             .cornerRadius(5)
-
+                            
                             Button (action: handleCancelExercise) {
                                 Text("Cancel")
                                     .frame(maxWidth: .infinity)
