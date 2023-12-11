@@ -3,6 +3,7 @@ import SwiftUI
 struct WorkoutDay: Codable, Identifiable {
     var id = UUID()
     var name: String
+    var days: WorkoutSubDayViewModel
 }
 
 class WorkoutDayViewModel: ObservableObject {
@@ -13,7 +14,7 @@ class WorkoutDayViewModel: ObservableObject {
     }
     
     func addItem(name: String) {
-        let newItem = WorkoutDay(name: name)
+        let newItem = WorkoutDay(name: name, days: WorkoutSubDayViewModel())
         workoutDays.append(newItem)
         saveWorkoutDays()
     }
@@ -85,6 +86,7 @@ struct NewWorkoutPlanPrompt: View {
 
 struct WorkoutView: View {
     @State var name: String
+    @ObservedObject var workoutDays: WorkoutSubDayViewModel
     var body: some View {
         ZStack {
             VStack {
@@ -93,17 +95,56 @@ struct WorkoutView: View {
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button(action: {
-                    print("Action1")
+                    workoutDays.addItem(name: "hello")
                 }) {
                     Text("New Workout Day")
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                List {
+                    ForEach(workoutDays.workoutDays) {item in
+                        Text(item.name)
+                            .listRowInsets(EdgeInsets())
+                    }
+                }
+                .listStyle(PlainListStyle())
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal)
         }
+    }
+}
+
+struct WorkoutSubDay: Codable, Identifiable {
+    var id = UUID()
+    var name: String
+}
+
+class WorkoutSubDayViewModel: ObservableObject, Codable {
+    @Published var workoutDays: [WorkoutSubDay] = []
+    
+    init() {
+        
+    }
+    
+    enum CodingKeys: CodingKey {
+            case workoutDays
+        }
+    
+    required init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            workoutDays = try container.decode([WorkoutSubDay].self, forKey: .workoutDays)
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(workoutDays, forKey: .workoutDays)
+        }
+    
+    func addItem(name: String) {
+        let newItem = WorkoutSubDay(name: name)
+        workoutDays.append(newItem)
     }
 }
 
@@ -129,7 +170,7 @@ struct ContentView: View {
                         
                         List {
                             ForEach(workoutDayViewModel.workoutDays) {item in
-                                NavigationLink(destination: WorkoutView(name: item.name)) {
+                                NavigationLink(destination: WorkoutView(name: item.name, workoutDays: item.days)) {
                                     Text(item.name)
                                         .listRowInsets(EdgeInsets())
                                 }
@@ -163,5 +204,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    WorkoutView(name: "demo")
+    WorkoutView(name: "demo", workoutDays: WorkoutSubDayViewModel())
 }
