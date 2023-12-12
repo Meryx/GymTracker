@@ -19,7 +19,7 @@ class WorkoutDayViewModel: ObservableObject {
         saveWorkoutDays()
     }
     
-    private func saveWorkoutDays() {
+    func saveWorkoutDays() {
         if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             let archiveURL = documentsDirectory.appendingPathComponent("workout_days.plist")
             let encoder = PropertyListEncoder()
@@ -84,9 +84,52 @@ struct NewWorkoutPlanPrompt: View {
     }
 }
 
+struct NewDayPrompt: View {
+    @State var name: String = ""
+    @Binding var showPrompt: Bool
+    @ObservedObject var workoutDayViewModel: WorkoutSubDayViewModel
+    var onMutation: () -> Void
+    var body: some View {
+        VStack {
+            HStack {
+                Text("Name:")
+                    .frame(alignment: .leading)
+                TextField("e.g. Squat", text: $name)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.callout)
+                    .frame(width: 200)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Button (action: {
+                showPrompt = false
+                workoutDayViewModel.addItem(name: name)
+                onMutation()
+            }) {
+                Text("Ok")
+                    .frame(maxWidth: .infinity)
+                    .fontWeight(.bold)
+            }
+            .buttonStyle(.bordered)
+            Button (action: {
+                showPrompt = false
+            }) {
+                Text("Cancel")
+                    .frame(maxWidth: .infinity)
+                    .fontWeight(.bold)
+            }
+            .buttonStyle(.bordered)
+        }
+        .frame(height: 150, alignment: .topLeading)
+        .cornerRadius(15)
+    }
+}
+
 struct WorkoutView: View {
-    @State var name: String
+    @State var name: String = ""
+    @State var showPrompt: Bool = false
     @ObservedObject var workoutDays: WorkoutSubDayViewModel
+
+    var onMutation: () -> Void
     var body: some View {
         ZStack {
             VStack {
@@ -95,7 +138,7 @@ struct WorkoutView: View {
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button(action: {
-                    workoutDays.addItem(name: "hello")
+                    showPrompt.toggle()
                 }) {
                     Text("New Workout Day")
                         .fontWeight(.bold)
@@ -112,6 +155,13 @@ struct WorkoutView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal)
+            if showPrompt {
+                NewDayPrompt(showPrompt: $showPrompt, workoutDayViewModel: workoutDays, onMutation: onMutation)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.85)
+                    .padding([.horizontal, .top])
+                    .background(.white)
+                    .cornerRadius(15)
+            }
         }
     }
 }
@@ -129,18 +179,18 @@ class WorkoutSubDayViewModel: ObservableObject, Codable {
     }
     
     enum CodingKeys: CodingKey {
-            case workoutDays
-        }
+        case workoutDays
+    }
     
     required init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            workoutDays = try container.decode([WorkoutSubDay].self, forKey: .workoutDays)
-        }
-
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(workoutDays, forKey: .workoutDays)
-        }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        workoutDays = try container.decode([WorkoutSubDay].self, forKey: .workoutDays)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(workoutDays, forKey: .workoutDays)
+    }
     
     func addItem(name: String) {
         let newItem = WorkoutSubDay(name: name)
@@ -170,7 +220,7 @@ struct ContentView: View {
                         
                         List {
                             ForEach(workoutDayViewModel.workoutDays) {item in
-                                NavigationLink(destination: WorkoutView(name: item.name, workoutDays: item.days)) {
+                                NavigationLink(destination: WorkoutView(name: item.name, workoutDays: item.days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
                                     Text(item.name)
                                         .listRowInsets(EdgeInsets())
                                 }
@@ -203,6 +253,7 @@ struct ContentView: View {
     ContentView()
 }
 
-#Preview {
-    WorkoutView(name: "demo", workoutDays: WorkoutSubDayViewModel())
-}
+//#Preview {
+//    let x = WorkoutSubDayViewModel()
+//    WorkoutView(name: "demo", workoutDays: x, onMutation: x.saveWorkoutDays)
+//}
