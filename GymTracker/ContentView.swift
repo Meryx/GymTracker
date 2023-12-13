@@ -207,6 +207,7 @@ class WorkoutSubDayViewModel: ObservableObject, Codable {
 struct Exercise: Codable, Identifiable {
     var id = UUID()
     var name: String
+    var exerciseViewModels: ExerciseRowDetailViewModel
 }
 
 class ExerciseViewModel: ObservableObject, Codable {
@@ -231,7 +232,7 @@ class ExerciseViewModel: ObservableObject, Codable {
     }
     
     func addItem(name: String) {
-        let newItem = Exercise(name: name)
+        let newItem = Exercise(name: name, exerciseViewModels: ExerciseRowDetailViewModel())
         exercises.append(newItem)
     }
 }
@@ -301,13 +302,13 @@ struct DayView: View {
                 if !showPrompt {
                     List {
                         ForEach(exerciseViewModel.exercises) {item in
-                            Text(item.name)
+                            ExerciseRowView(name: item.name, exerciseDetails: item.exerciseViewModels,
+                                            onMutation: onMutation)
                                 .listRowInsets(EdgeInsets())
                         }
                     }
                     .listStyle(PlainListStyle())
                 }
-                ExerciseRowView()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal)
@@ -323,11 +324,82 @@ struct DayView: View {
     }
 }
 
+class ExerciseRowDetailViewModel: ObservableObject, Codable {
+    var counter: Int = 1
+    @Published var exerciseDetail: [ExerciseDetail] = []
+    
+    init() {
+        
+    }
+    
+    enum CodingKeys: CodingKey {
+        case exerciseDetail
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        exerciseDetail = try container.decode([ExerciseDetail].self, forKey: .exerciseDetail)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(exerciseDetail, forKey: .exerciseDetail)
+    }
+    
+    func addItem() {
+        exerciseDetail.append(ExerciseDetail(setsText: "\(counter)"))
+        counter = counter + 1
+    }
+}
+
+struct ExerciseDetail: Codable, Identifiable {
+    var id = UUID()
+    var setsText: String = ""
+    var kgText: String = ""
+    var repsText: String = ""
+}
+
+struct ExerciseRowDetail: View {
+    @Binding var item: ExerciseDetail;
+    var onMutation: () -> Void
+    var body: some View {
+        HStack {
+            TextField("", text: $item.setsText)
+                .fontWeight(.bold)
+                .frame(width: 30)
+                .multilineTextAlignment(.center)
+                .background(.gray.opacity(0.5))
+                .cornerRadius(10)
+                .disabled(true)
+            
+            TextField("", text: $item.kgText)
+                .fontWeight(.bold)
+                .frame(width: 50)
+                .multilineTextAlignment(.center)
+                .background(.gray.opacity(0.5))
+                .cornerRadius(10)
+                .onChange(of: item.kgText, {
+                    onMutation()
+                })
+            TextField("", text: $item.repsText)
+                .fontWeight(.bold)
+                .frame(width: 50)
+                .multilineTextAlignment(.center)
+                .background(.gray.opacity(0.5))
+                .cornerRadius(10)
+                .onChange(of: item.repsText, {
+                    onMutation()
+                })
+            
+        }
+    }
+}
+
 struct ExerciseRowView: View {
-    @State var name: String = "Hello"
-    @State var setsText: String = "3"
-    @State var kgText: String = "120"
-    @State var repsText: String = "12"
+    @State var name: String = ""
+
+    @ObservedObject var exerciseDetails: ExerciseRowDetailViewModel
+    var onMutation: () -> Void
     var body: some View {
         VStack(alignment: .leading) {
             Text("\(name)")
@@ -347,30 +419,20 @@ struct ExerciseRowView: View {
                     .frame(width: 50, alignment: .center)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            HStack {
-                        TextField("", text: $setsText)
-                            .fontWeight(.bold)
-                            .frame(width: 30)
-                            .multilineTextAlignment(.center)
-                            .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
-                            .disabled(true)
+                ForEach($exerciseDetails.exerciseDetail) {$item in
+                    ExerciseRowDetail(item: $item, onMutation: onMutation)
+                }
             
-                        TextField("", text: $kgText)
-                            .fontWeight(.bold)
-                            .frame(width: 50)
-                            .multilineTextAlignment(.center)
-                            .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
-                        TextField("", text: $repsText)
-                            .fontWeight(.bold)
-                            .frame(width: 50)
-                            .multilineTextAlignment(.center)
-                            .background(.gray.opacity(0.5))
-                            .cornerRadius(10)
+            Button(action: {
+                exerciseDetails.addItem()
+                onMutation()
+            }) {
+                Text("+")
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
             
-                    }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -439,6 +501,6 @@ struct ContentView: View {
 //    DayView(name: "Leg Day", exerciseViewModel: ExerciseViewModel())
 //}
 
-#Preview {
-    ExerciseRowView()
-}
+//#Preview {
+//    ExerciseRowView()
+//}
