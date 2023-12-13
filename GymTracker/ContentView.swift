@@ -128,7 +128,7 @@ struct WorkoutView: View {
     @State var name: String = ""
     @State var showPrompt: Bool = false
     @ObservedObject var workoutDays: WorkoutSubDayViewModel
-
+    
     var onMutation: () -> Void
     var body: some View {
         ZStack {
@@ -148,8 +148,10 @@ struct WorkoutView: View {
                 if !showPrompt {
                     List {
                         ForEach(workoutDays.workoutDays) {item in
-                            Text(item.name)
-                                .listRowInsets(EdgeInsets())
+                            NavigationLink(destination: DayView(name: item.name, exerciseViewModel: item.exerciseViewModel, onMutation: onMutation)) {
+                                Text(item.name)
+                                    .listRowInsets(EdgeInsets())
+                            }
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -172,6 +174,7 @@ struct WorkoutView: View {
 struct WorkoutSubDay: Codable, Identifiable {
     var id = UUID()
     var name: String
+    var exerciseViewModel: ExerciseViewModel
 }
 
 class WorkoutSubDayViewModel: ObservableObject, Codable {
@@ -196,7 +199,7 @@ class WorkoutSubDayViewModel: ObservableObject, Codable {
     }
     
     func addItem(name: String) {
-        let newItem = WorkoutSubDay(name: name)
+        let newItem = WorkoutSubDay(name: name, exerciseViewModel: ExerciseViewModel())
         workoutDays.append(newItem)
     }
 }
@@ -237,6 +240,7 @@ struct NewExercisePrompt: View {
     @State var name: String = ""
     @Binding var showPrompt: Bool
     @ObservedObject var exerciseViewModel: ExerciseViewModel
+    var onMutation: () -> Void
     
     var body: some View {
         VStack {
@@ -252,7 +256,7 @@ struct NewExercisePrompt: View {
             Button (action: {
                 showPrompt = false
                 exerciseViewModel.addItem(name: name)
-//                onMutation()
+                onMutation()
             }) {
                 Text("Ok")
                     .frame(maxWidth: .infinity)
@@ -277,7 +281,8 @@ struct DayView: View {
     @State var name: String = ""
     @State var showPrompt: Bool = false
     @ObservedObject var exerciseViewModel: ExerciseViewModel
-
+    var onMutation: () -> Void
+    
     var body: some View {
         ZStack {
             VStack {
@@ -302,17 +307,70 @@ struct DayView: View {
                     }
                     .listStyle(PlainListStyle())
                 }
+                ExerciseRowView()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal)
             .background(showPrompt ? .gray.opacity(0.5) : .white)
             if showPrompt {
-                NewExercisePrompt(showPrompt: $showPrompt, exerciseViewModel: exerciseViewModel)
+                NewExercisePrompt(showPrompt: $showPrompt, exerciseViewModel: exerciseViewModel, onMutation: onMutation)
                     .frame(maxWidth: UIScreen.main.bounds.width * 0.85)
                     .padding([.horizontal, .top])
                     .background(.white)
                     .cornerRadius(15)
             }
+        }
+    }
+}
+
+struct ExerciseRowView: View {
+    @State var name: String = "Hello"
+    @State var setsText: String = "3"
+    @State var kgText: String = "120"
+    @State var repsText: String = "12"
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("\(name)")
+                .fontWeight(.bold)
+                .foregroundColor(.blue)
+            
+            
+            HStack {
+                Text("Set")
+                    .fontWeight(.bold)
+                    .frame(width: 30, alignment: .leading)
+                Text("kg")
+                    .fontWeight(.bold)
+                    .frame(width: 50, alignment: .center)
+                Text("Reps")
+                    .fontWeight(.bold)
+                    .frame(width: 50, alignment: .center)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                        TextField("", text: $setsText)
+                            .fontWeight(.bold)
+                            .frame(width: 30)
+                            .multilineTextAlignment(.center)
+                            .background(.gray.opacity(0.5))
+                            .cornerRadius(10)
+                            .disabled(true)
+            
+                        TextField("", text: $kgText)
+                            .fontWeight(.bold)
+                            .frame(width: 50)
+                            .multilineTextAlignment(.center)
+                            .background(.gray.opacity(0.5))
+                            .cornerRadius(10)
+                        TextField("", text: $repsText)
+                            .fontWeight(.bold)
+                            .frame(width: 50)
+                            .multilineTextAlignment(.center)
+                            .background(.gray.opacity(0.5))
+                            .cornerRadius(10)
+            
+                    }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -377,6 +435,10 @@ struct ContentView: View {
 //    WorkoutView(name: "demo", workoutDays: x, onMutation: x.saveWorkoutDays)
 //}
 
+//#Preview {
+//    DayView(name: "Leg Day", exerciseViewModel: ExerciseViewModel())
+//}
+
 #Preview {
-    DayView(name: "Leg Day", exerciseViewModel: ExerciseViewModel())
+    ExerciseRowView()
 }
