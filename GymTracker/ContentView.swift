@@ -137,6 +137,7 @@ struct WorkoutView: View {
                     .font(.title)
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.black)
                 Button(action: {
                     showPrompt.toggle()
                 }) {
@@ -146,13 +147,15 @@ struct WorkoutView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 if !showPrompt {
-                    List {
-                        ForEach(workoutDays.workoutDays) {item in
+                    List(workoutDays.workoutDays) { item in
+ 
                             NavigationLink(destination: DayView(name: item.name, exerciseViewModel: item.exerciseViewModel, onMutation: onMutation)) {
                                 Text(item.name)
-                                    .listRowInsets(EdgeInsets())
                             }
-                        }
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.white)
+                            .foregroundColor(.black)
+                        
                     }
                     .listStyle(PlainListStyle())
                 }
@@ -291,6 +294,7 @@ struct DayView: View {
                     .font(.title)
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.black)
                 Button(action: {
                     showPrompt.toggle()
                 }) {
@@ -300,12 +304,15 @@ struct DayView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 if !showPrompt {
-                    List {
-                        ForEach(exerciseViewModel.exercises) {item in
+                    List(exerciseViewModel.exercises) {item in
+
                             ExerciseRowView(name: item.name, exerciseDetails: item.exerciseViewModels,
                                             onMutation: onMutation)
                                 .listRowInsets(EdgeInsets())
-                        }
+                                .listRowBackground(Color.white)
+                                .foregroundColor(Color.black)
+                                .listRowSeparator(.hidden)
+                        
                     }
                     .listStyle(PlainListStyle())
                 }
@@ -442,13 +449,14 @@ struct ContentView: View {
     @State private var showPrompt = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 VStack() {
                     Text("Start Workout")
                         .font(.title)
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.black)
                     Button(action: handleNewWorkoutDayClick) {
                         Text("New Workout Plan")
                             .fontWeight(.bold)
@@ -457,13 +465,15 @@ struct ContentView: View {
                     .buttonStyle(.borderedProminent)
                     if !showPrompt {
                         
-                        List {
-                            ForEach(workoutDayViewModel.workoutDays) {item in
+                        List(workoutDayViewModel.workoutDays) {item in
                                 NavigationLink(destination: WorkoutView(name: item.name, workoutDays: item.days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
                                     Text(item.name)
-                                        .listRowInsets(EdgeInsets())
-                                }
+                                       
                             }
+                                .listRowBackground(Color.white)
+                                .listRowInsets(EdgeInsets())
+                                .foregroundColor(.black)
+
                         }
                         .listStyle(PlainListStyle())
                         
