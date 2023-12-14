@@ -1,5 +1,37 @@
 import SwiftUI
 
+class NumbersOnly: ObservableObject, Codable {
+    @Published var value = "" {
+        didSet {
+            let filtered = value.filter { !$0.isNumber && $0 != "." }
+            if value != filtered {
+                value = filtered
+            }
+        }
+    }
+
+    enum CodingKeys: CodingKey {
+        case value
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        value = try container.decode(String.self, forKey: .value)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value, forKey: .value)
+    }
+
+    init() {}
+
+    init(value: String) {
+        self.value = value
+    }
+}
+
+
 struct WorkoutDay: Codable, Identifiable {
     var id = UUID()
     var name: String
@@ -216,6 +248,12 @@ struct Exercise: Codable, Identifiable {
 class ExerciseViewModel: ObservableObject, Codable {
     @Published var exercises: [Exercise] = []
     
+    func updateAllExerciseDetails() {
+            for exercise in exercises {
+                exercise.exerciseViewModels.updatePreviousValues()
+            }
+        }
+    
     init() {
         
     }
@@ -303,6 +341,18 @@ struct DayView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                Button(action: {
+                    exerciseViewModel.updateAllExerciseDetails()
+                    onMutation()
+                }) {
+                    Text("Save Workout")
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity)
+                }
+                .frame(height: 35)
+                .background(.green)
+                .foregroundColor(.white)
+                .cornerRadius(5)
                 if !showPrompt {
                     List(exerciseViewModel.exercises) {item in
 
@@ -316,6 +366,7 @@ struct DayView: View {
                     }
                     .listStyle(PlainListStyle())
                 }
+                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal)
@@ -334,6 +385,15 @@ struct DayView: View {
 class ExerciseRowDetailViewModel: ObservableObject, Codable {
     var counter: Int = 1
     @Published var exerciseDetail: [ExerciseDetail] = []
+    
+    func updatePreviousValues() {
+            for i in 0..<exerciseDetail.count {
+
+                    exerciseDetail[i].prevKg = exerciseDetail[i].kgText
+                    exerciseDetail[i].prevReps = exerciseDetail[i].repsText
+                
+            }
+        }
     
     init() {
         
@@ -364,16 +424,38 @@ struct ExerciseDetail: Codable, Identifiable {
     var setsText: String = ""
     var kgText: String = ""
     var repsText: String = ""
+    var prevKg: String = "N/A"
+    var prevReps: String = "N/A"
 }
 
 struct ExerciseRowDetail: View {
     @Binding var item: ExerciseDetail;
+    @State var one: String = ""
+    @State var two: String = ""
+    @ObservedObject var kgText = NumbersOnly()
+    @ObservedObject var repsText = NumbersOnly()
     var onMutation: () -> Void
     var body: some View {
         HStack {
             TextField("", text: $item.setsText)
                 .fontWeight(.bold)
                 .frame(width: 30)
+                .multilineTextAlignment(.center)
+                .background(.gray.opacity(0.5))
+                .cornerRadius(10)
+                .disabled(true)
+            
+            TextField("", text: $item.prevKg)
+                .fontWeight(.bold)
+                .frame(width: 90)
+                .multilineTextAlignment(.center)
+                .background(.gray.opacity(0.5))
+                .cornerRadius(10)
+                .disabled(true)
+            
+            TextField("", text: $item.prevReps)
+                .fontWeight(.bold)
+                .frame(width: 90)
                 .multilineTextAlignment(.center)
                 .background(.gray.opacity(0.5))
                 .cornerRadius(10)
@@ -388,6 +470,7 @@ struct ExerciseRowDetail: View {
                 .onChange(of: item.kgText, {
                     onMutation()
                 })
+                .keyboardType(.decimalPad)
             TextField("", text: $item.repsText)
                 .fontWeight(.bold)
                 .frame(width: 50)
@@ -397,6 +480,7 @@ struct ExerciseRowDetail: View {
                 .onChange(of: item.repsText, {
                     onMutation()
                 })
+                .keyboardType(.decimalPad)
             
         }
     }
@@ -418,6 +502,12 @@ struct ExerciseRowView: View {
                 Text("Set")
                     .fontWeight(.bold)
                     .frame(width: 30, alignment: .leading)
+                Text("Prev. kg")
+                    .fontWeight(.bold)
+                    .frame(width: 90, alignment: .center)
+                Text("Prev. Reps")
+                    .fontWeight(.bold)
+                    .frame(width: 90, alignment: .center)
                 Text("kg")
                     .fontWeight(.bold)
                     .frame(width: 50, alignment: .center)
@@ -481,6 +571,7 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.horizontal)
+                .padding(.top, 38)
                 .background(showPrompt ? .gray.opacity(0.5) : .white)
                 
                 if showPrompt {
@@ -493,6 +584,8 @@ struct ContentView: View {
             }
         }
     }
+    
+    
     func handleNewWorkoutDayClick() {
         showPrompt = true
     }
@@ -500,17 +593,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(\.colorScheme, .light) // Force light mode
+    
 }
-
-//#Preview {
-//    let x = WorkoutSubDayViewModel()
-//    WorkoutView(name: "demo", workoutDays: x, onMutation: x.saveWorkoutDays)
-//}
-
-//#Preview {
-//    DayView(name: "Leg Day", exerciseViewModel: ExerciseViewModel())
-//}
-
-//#Preview {
-//    ExerciseRowView()
-//}
