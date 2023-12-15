@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 class NumbersOnly: ObservableObject, Codable {
     @Published var value = "" {
@@ -344,6 +345,7 @@ struct DayView: View {
                 Button(action: {
                     exerciseViewModel.updateAllExerciseDetails()
                     onMutation()
+                    
                 }) {
                     Text("Save Workout")
                         .fontWeight(.bold)
@@ -391,6 +393,8 @@ class ExerciseRowDetailViewModel: ObservableObject, Codable {
 
                     exerciseDetail[i].prevKg = exerciseDetail[i].kgText
                     exerciseDetail[i].prevReps = exerciseDetail[i].repsText
+                exerciseDetail[i].kgText = ""
+                exerciseDetail[i].repsText = ""
                 
             }
         }
@@ -532,6 +536,23 @@ struct ExerciseRowView: View {
             
         }
     }
+}
+
+
+
+
+struct ExerciseHistory: Codable, Identifiable {
+    var id = UUID()
+    var name: String
+    var rows: [ExerciseRowHistory] = []
+    var date = Date()
+}
+
+struct ExerciseRowHistory: Codable, Identifiable {
+    var id = UUID()
+    var set: Int
+    var kg: Double
+    var reps: Int
 }
 
 struct ContentView: View {
