@@ -1,6 +1,36 @@
 import SwiftUI
 import Foundation
 
+class GlobalData: ObservableObject {
+    @Published var myArray: [ExerciseHistory] = []
+    
+    func saveWorkoutDays() {
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let archiveURL = documentsDirectory.appendingPathComponent("workout_history.plist")
+            let encoder = PropertyListEncoder()
+            encoder.outputFormat = .xml
+            
+            do {
+                let data = try encoder.encode(myArray)
+                try data.write(to: archiveURL)
+            } catch {
+                print("Error saving workout days: \(error)")
+            }
+        }
+    }
+    
+    private func loadWorkoutDays() {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let archiveURL = documentsDirectory?.appendingPathComponent("workout_history.plist")
+        
+        if let archiveURL = archiveURL,
+           let data = try? Data(contentsOf: archiveURL),
+           let decodedWorkoutDays = try? PropertyListDecoder().decode([ExerciseHistory].self, from: data) {
+            myArray = decodedWorkoutDays
+        }
+    }
+}
+
 class NumbersOnly: ObservableObject, Codable {
     @Published var value = "" {
         didSet {
@@ -324,7 +354,11 @@ struct DayView: View {
     @State var name: String = ""
     @State var showPrompt: Bool = false
     @ObservedObject var exerciseViewModel: ExerciseViewModel
+    @EnvironmentObject var globalData: GlobalData
+
     var onMutation: () -> Void
+    @FocusState var nameIsFocused: Bool
+
     
     var body: some View {
         ZStack {
@@ -343,8 +377,21 @@ struct DayView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 Button(action: {
+                    for i in 0..<exerciseViewModel.exercises.count {
+                        var e = ExerciseHistory(name: exerciseViewModel.exercises[i].name)
+                        for j in 0..<exerciseViewModel.exercises[i].exerciseViewModels.exerciseDetail.count {
+                            let f = exerciseViewModel.exercises[i].exerciseViewModels.exerciseDetail[j]
+                            let add = ExerciseRowHistory(set: Int(f.setsText)!, kg: Double(f.kgText) ?? 0, reps: Int(f.repsText) ?? 0)
+                            e.rows.append(add)
+                        }
+
+                        
+                        globalData.myArray.append(e)
+                        
+                    }
                     exerciseViewModel.updateAllExerciseDetails()
                     onMutation()
+                    globalData.saveWorkoutDays()
                     
                 }) {
                     Text("Save Workout")
@@ -358,8 +405,8 @@ struct DayView: View {
                 if !showPrompt {
                     List(exerciseViewModel.exercises) {item in
 
-                            ExerciseRowView(name: item.name, exerciseDetails: item.exerciseViewModels,
-                                            onMutation: onMutation)
+                        ExerciseRowView(name: item.name, nameIsFocused: _nameIsFocused, exerciseDetails: item.exerciseViewModels,
+                                        onMutation: onMutation)
                                 .listRowInsets(EdgeInsets())
                                 .listRowBackground(Color.white)
                                 .foregroundColor(Color.black)
@@ -380,6 +427,9 @@ struct DayView: View {
                     .background(.white)
                     .cornerRadius(15)
             }
+        }
+        .onTapGesture {
+            nameIsFocused = false
         }
     }
 }
@@ -434,10 +484,7 @@ struct ExerciseDetail: Codable, Identifiable {
 
 struct ExerciseRowDetail: View {
     @Binding var item: ExerciseDetail;
-    @State var one: String = ""
-    @State var two: String = ""
-    @ObservedObject var kgText = NumbersOnly()
-    @ObservedObject var repsText = NumbersOnly()
+    @FocusState var nameIsFocused: Bool
     var onMutation: () -> Void
     var body: some View {
         HStack {
@@ -475,6 +522,7 @@ struct ExerciseRowDetail: View {
                     onMutation()
                 })
                 .keyboardType(.decimalPad)
+                .focused($nameIsFocused)
             TextField("", text: $item.repsText)
                 .fontWeight(.bold)
                 .frame(width: 50)
@@ -485,6 +533,7 @@ struct ExerciseRowDetail: View {
                     onMutation()
                 })
                 .keyboardType(.decimalPad)
+                .focused($nameIsFocused)
             
         }
     }
@@ -492,6 +541,7 @@ struct ExerciseRowDetail: View {
 
 struct ExerciseRowView: View {
     @State var name: String = ""
+    @FocusState var nameIsFocused: Bool
 
     @ObservedObject var exerciseDetails: ExerciseRowDetailViewModel
     var onMutation: () -> Void
@@ -521,7 +571,7 @@ struct ExerciseRowView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
                 ForEach($exerciseDetails.exerciseDetail) {$item in
-                    ExerciseRowDetail(item: $item, onMutation: onMutation)
+                    ExerciseRowDetail(item: $item, nameIsFocused: _nameIsFocused, onMutation: onMutation)
                 }
             
             Button(action: {
@@ -558,6 +608,8 @@ struct ExerciseRowHistory: Codable, Identifiable {
 struct ContentView: View {
     @StateObject private var workoutDayViewModel = WorkoutDayViewModel()
     @State private var showPrompt = false
+    @StateObject var globalData = GlobalData()
+
     
     var body: some View {
         NavigationStack {
@@ -604,7 +656,9 @@ struct ContentView: View {
                 }
             }
         }
+        .environmentObject(globalData)
     }
+    
     
     
     func handleNewWorkoutDayClick() {
