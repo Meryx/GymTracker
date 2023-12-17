@@ -210,11 +210,11 @@ struct WorkoutView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 if !showPrompt {
-                    List(workoutDays.workoutDays) { item in
+                    List(workoutDays.workoutDays.indices, id: \.self) { index in
  
-                            NavigationLink(destination: DayView(name: item.name, exerciseViewModel: item.exerciseViewModel, onMutation: onMutation)) {
-                                Text(item.name)
-                            }
+                        NavigationLink(destination: DayView(name: self.workoutDays.workoutDays[index].name, exerciseViewModel: self.workoutDays.workoutDays[index].exerciseViewModel, onMutation: onMutation)) {
+                            DayRow(name: self.workoutDays.workoutDays[index].name, index: index, viewModel: workoutDays, onMutation: onMutation)
+                        }
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.white)
                             .foregroundColor(.black)
@@ -403,10 +403,10 @@ struct DayView: View {
                 .foregroundColor(.white)
                 .cornerRadius(5)
                 if !showPrompt {
-                    List(exerciseViewModel.exercises) {item in
+                    List(exerciseViewModel.exercises.indices, id: \.self) {index in
 
-                        ExerciseRowView(name: item.name, nameIsFocused: _nameIsFocused, exerciseDetails: item.exerciseViewModels,
-                                        onMutation: onMutation)
+                        ExerciseRowView(name: self.exerciseViewModel.exercises[index].name, nameIsFocused: _nameIsFocused, exerciseDetails: self.exerciseViewModel.exercises[index].exerciseViewModels,
+                                        onMutation: onMutation, index: index, viewModel: self.exerciseViewModel)
                                 .listRowInsets(EdgeInsets())
                                 .listRowBackground(Color.white)
                                 .foregroundColor(Color.black)
@@ -545,11 +545,26 @@ struct ExerciseRowView: View {
 
     @ObservedObject var exerciseDetails: ExerciseRowDetailViewModel
     var onMutation: () -> Void
+    var index: Int
+    var viewModel: ExerciseViewModel
     var body: some View {
         VStack(alignment: .leading) {
-            Text("\(name)")
-                .fontWeight(.bold)
+            HStack {
+                Text("\(name)")
+                    .fontWeight(.bold)
                 .foregroundColor(.blue)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "trash")
+                    .onTapGesture {
+                        viewModel.exercises.remove(at: index)
+                        onMutation()
+                    }
+                    .padding(5)
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(5)
+            }
+            
             
             
             HStack {
@@ -617,6 +632,28 @@ struct WorkoutPlanRow: View {
                 .onTapGesture {
                     viewModel.workoutDays.remove(at: index)
                     viewModel.saveWorkoutDays()
+                }
+                .padding(5)
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(5)
+        }
+    }
+}
+
+struct DayRow: View {
+    var name: String
+    var index: Int
+    @ObservedObject var viewModel: WorkoutSubDayViewModel
+    var onMutation: () -> Void
+    var body: some View {
+        HStack {
+            Text(name)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "trash")
+                .onTapGesture {
+                    viewModel.workoutDays.remove(at: index)
+                    onMutation()
                 }
                 .padding(5)
                 .background(Color.red)
