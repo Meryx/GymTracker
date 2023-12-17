@@ -605,6 +605,27 @@ struct ExerciseRowHistory: Codable, Identifiable {
     var reps: Int
 }
 
+struct WorkoutPlanRow: View {
+    var name: String
+    var index: Int
+    @ObservedObject var viewModel: WorkoutDayViewModel
+    var body: some View {
+        HStack {
+            Text(name)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "trash")
+                .onTapGesture {
+                    viewModel.workoutDays.remove(at: index)
+                    viewModel.saveWorkoutDays()
+                }
+                .padding(5)
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(5)
+        }
+    }
+}
+
 struct ContentView: View {
     @StateObject private var workoutDayViewModel = WorkoutDayViewModel()
     @State private var showPrompt = false
@@ -628,9 +649,9 @@ struct ContentView: View {
                     .buttonStyle(.borderedProminent)
                     if !showPrompt {
                         
-                        List(workoutDayViewModel.workoutDays) {item in
-                                NavigationLink(destination: WorkoutView(name: item.name, workoutDays: item.days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
-                                    Text(item.name)
+                        List(workoutDayViewModel.workoutDays.indices, id: \.self) {index in
+                            NavigationLink(destination: WorkoutView(name: self.workoutDayViewModel.workoutDays[index].name, workoutDays: self.workoutDayViewModel.workoutDays[index].days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
+                                WorkoutPlanRow(name: self.workoutDayViewModel.workoutDays[index].name, index: index, viewModel: workoutDayViewModel)
                                        
                             }
                                 .listRowBackground(Color.white)
@@ -671,3 +692,5 @@ struct ContentView: View {
         .environment(\.colorScheme, .light) // Force light mode
     
 }
+
+
