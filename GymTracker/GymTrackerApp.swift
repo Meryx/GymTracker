@@ -7,7 +7,7 @@ struct GymTrackerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WorkoutPlanView()
                 .environment(\.colorScheme, .light) // Force light mode
         }
     }

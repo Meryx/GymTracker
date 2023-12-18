@@ -7,11 +7,9 @@
 
 import SwiftUI
 
-struct WorkoutPlanListView: View {
-    @StateObject private var workoutDayViewModel = WorkoutDayViewModel()
-    @State private var showPrompt = false
+struct WorkoutPlanView: View {
+    @StateObject private var viewModel = WorkoutPlanViewModel()
     @StateObject var globalData = GlobalData()
-
     
     var body: some View {
         NavigationStack {
@@ -22,23 +20,23 @@ struct WorkoutPlanListView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.black)
-                    Button(action: handleNewWorkoutDayClick) {
+                    Button(action: viewModel.handleNewWorkoutPlanClick) {
                         Text("New Workout Plan")
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    if !showPrompt {
+                    if !viewModel.isPromptShown() {
                         
-                        List(workoutDayViewModel.workoutDays.indices, id: \.self) {index in
-                            NavigationLink(destination: WorkoutView(name: self.workoutDayViewModel.workoutDays[index].name, workoutDays: self.workoutDayViewModel.workoutDays[index].days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
-                                WorkoutPlanRow(name: self.workoutDayViewModel.workoutDays[index].name, index: index, viewModel: workoutDayViewModel)
-                                       
+                        List(viewModel.publicWorkoutPlans.indices, id: \.self) { index in
+                            NavigationLink(destination: WorkoutView(name: viewModel.publicWorkoutPlans[index].name, workoutDays: viewModel.publicWorkoutPlans[index].days, onMutation: viewModel.saveWorkoutDays)) {
+                                WorkoutPlanRowView(name: viewModel.publicWorkoutPlans[index].name, index: index, viewModel: viewModel)
+                                
                             }
-                                .listRowBackground(Color.white)
-                                .listRowInsets(EdgeInsets())
-                                .foregroundColor(.black)
-
+                            .listRowBackground(Color.white)
+                            .listRowInsets(EdgeInsets())
+                            .foregroundColor(.black)
+                            
                         }
                         .listStyle(PlainListStyle())
                         
@@ -47,10 +45,10 @@ struct WorkoutPlanListView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.horizontal)
                 .padding(.top, 38)
-                .background(showPrompt ? .gray.opacity(0.5) : .white)
+                .background(viewModel.isPromptShown() ? .gray.opacity(0.5) : .white)
                 
-                if showPrompt {
-                    NewWorkoutPlanPrompt(showPrompt: $showPrompt, workoutDayViewModel: workoutDayViewModel)
+                if viewModel.isPromptShown() {
+                    WorkoutPlanPromptView(viewModel: viewModel)
                         .frame(maxWidth: UIScreen.main.bounds.width * 0.85)
                         .padding([.horizontal, .top])
                         .background(.white)
@@ -60,14 +58,8 @@ struct WorkoutPlanListView: View {
         }
         .environmentObject(globalData)
     }
-    
-    
-    
-    func handleNewWorkoutDayClick() {
-        showPrompt = true
-    }
 }
 
 #Preview {
-    WorkoutPlanListView()
+    WorkoutPlanView()
 }
