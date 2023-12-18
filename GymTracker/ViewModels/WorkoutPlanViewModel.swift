@@ -10,6 +10,8 @@ import Foundation
 class WorkoutPlanViewModel: ObservableObject {
     @Published private var workoutPlans: [WorkoutPlanModel] = []
     @Published private var showPrompt: Bool = false
+    @Published private var showWarningPrompt: Bool = false
+    @Published var markForDeletion: Int = 0
     
     init() {
         loadWorkoutDays()
@@ -25,6 +27,11 @@ class WorkoutPlanViewModel: ObservableObject {
         workoutPlans.remove(at: at)
     }
     
+    func removeWorkoutPlan()
+    {
+        workoutPlans.remove(at: markForDeletion)
+    }
+    
     func isPromptShown() -> Bool
     {
         return showPrompt
@@ -35,9 +42,24 @@ class WorkoutPlanViewModel: ObservableObject {
         showPrompt = false
     }
     
+    func isWarningPromptShown() -> Bool
+    {
+        return showWarningPrompt
+    }
+    
+    func hideWarningPrompt()
+    {
+        showWarningPrompt = false
+    }
+    
     func handleNewWorkoutPlanClick()
     {
         showPrompt = true
+    }
+    
+    func handleTrashWorkoutPlanClick()
+    {
+        showWarningPrompt = true
     }
     
     func addItem(name: String) {

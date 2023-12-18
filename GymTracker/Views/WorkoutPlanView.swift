@@ -54,6 +54,36 @@ struct WorkoutPlanView: View {
                         .background(.white)
                         .cornerRadius(15)
                 }
+                if viewModel.isWarningPromptShown() {
+                    VStack {
+                        HStack {
+                            Text("Delete this item?")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Button (action: {
+                            viewModel.removeWorkoutPlan()
+                            viewModel.saveWorkoutDays()
+                            viewModel.hideWarningPrompt()
+                        }) {
+                            Text("Ok")
+                                .frame(maxWidth: .infinity)
+                                .fontWeight(.bold)
+                        }
+                        .buttonStyle(.bordered)
+                        Button (action: {
+                            viewModel.hideWarningPrompt()
+                        }) {
+                            Text("Cancel")
+                                .frame(maxWidth: .infinity)
+                                .fontWeight(.bold)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .frame(height: 150, alignment: .topLeading)
+                    .cornerRadius(15)
+                    .padding(.top, 20)
+                }
             }
         }
         .environmentObject(globalData)
