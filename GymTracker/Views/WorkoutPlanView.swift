@@ -26,7 +26,7 @@ struct WorkoutPlanView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    if !viewModel.isPromptShown() {
+                    if (!viewModel.isPromptShown() && !viewModel.isWarningPromptShown()) {
                         
                         List(viewModel.publicWorkoutPlans.indices, id: \.self) { index in
                             NavigationLink(destination: WorkoutView(name: viewModel.publicWorkoutPlans[index].name, workoutDays: viewModel.publicWorkoutPlans[index].days, onMutation: viewModel.saveWorkoutDays)) {
@@ -45,7 +45,7 @@ struct WorkoutPlanView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.horizontal)
                 .padding(.top, 38)
-                .background(viewModel.isPromptShown() ? .gray.opacity(0.5) : .white)
+                .background((viewModel.isPromptShown() || viewModel.isWarningPromptShown()) ? .gray.opacity(0.5) : .white)
                 
                 if viewModel.isPromptShown() {
                     WorkoutPlanPromptView(viewModel: viewModel)
@@ -61,28 +61,33 @@ struct WorkoutPlanView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        Button (action: {
-                            viewModel.removeWorkoutPlan()
-                            viewModel.saveWorkoutDays()
-                            viewModel.hideWarningPrompt()
-                        }) {
-                            Text("Ok")
-                                .frame(maxWidth: .infinity)
-                                .fontWeight(.bold)
+                        VStack {
+                            Button (action: {
+                                viewModel.removeWorkoutPlan()
+                                viewModel.saveWorkoutDays()
+                                viewModel.hideWarningPrompt()
+                            }) {
+                                Text("Ok")
+                                    .frame(maxWidth: .infinity)
+                                    .fontWeight(.bold)
+                            }
+                            .buttonStyle(.bordered)
+                            
+                            Button (action: {
+                                viewModel.hideWarningPrompt()
+                            }) {
+                                Text("Cancel")
+                                    .frame(maxWidth: .infinity)
+                                    .fontWeight(.bold)
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        Button (action: {
-                            viewModel.hideWarningPrompt()
-                        }) {
-                            Text("Cancel")
-                                .frame(maxWidth: .infinity)
-                                .fontWeight(.bold)
-                        }
-                        .buttonStyle(.bordered)
+                        .frame(width: 250)
                     }
-                    .frame(height: 150, alignment: .topLeading)
+                    .frame(height: 200, alignment: .center)
+                    .background(Color.white)
                     .cornerRadius(15)
-                    .padding(.top, 20)
+                    .padding(.horizontal)
                 }
             }
         }

@@ -14,5 +14,5 @@ struct GymTrackerApp: App {
 }
 
 #Preview {
-    ContentView()
+    WorkoutPlanView()
 }
