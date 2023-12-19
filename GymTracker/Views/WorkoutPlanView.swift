@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WorkoutPlanView: View {
     @StateObject private var viewModel = WorkoutPlanViewModel()
-    @StateObject var globalData = GlobalData()
+    @EnvironmentObject var globalData: GlobalData
     
     var body: some View {
         NavigationStack {
@@ -91,7 +91,6 @@ struct WorkoutPlanView: View {
                 }
             }
         }
-        .environmentObject(globalData)
     }
 }
 

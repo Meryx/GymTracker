@@ -2,7 +2,11 @@ import SwiftUI
 import Foundation
 
 class GlobalData: ObservableObject {
-    @Published var myArray: [ExerciseHistory] = []
+    @Published var myArray: [ExerciseDayHistory] = []
+    
+    init() {
+        loadWorkoutDays()
+    }
     
     func saveWorkoutDays() {
         if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
@@ -19,13 +23,13 @@ class GlobalData: ObservableObject {
         }
     }
     
-    private func loadWorkoutDays() {
+    func loadWorkoutDays() {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         let archiveURL = documentsDirectory?.appendingPathComponent("workout_history.plist")
         
         if let archiveURL = archiveURL,
            let data = try? Data(contentsOf: archiveURL),
-           let decodedWorkoutDays = try? PropertyListDecoder().decode([ExerciseHistory].self, from: data) {
+           let decodedWorkoutDays = try? PropertyListDecoder().decode([ExerciseDayHistory].self, from: data) {
             myArray = decodedWorkoutDays
         }
     }
@@ -40,23 +44,23 @@ class NumbersOnly: ObservableObject, Codable {
             }
         }
     }
-
+    
     enum CodingKeys: CodingKey {
         case value
     }
-
+    
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         value = try container.decode(String.self, forKey: .value)
     }
-
+    
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(value, forKey: .value)
     }
-
+    
     init() {}
-
+    
     init(value: String) {
         self.value = value
     }
@@ -211,13 +215,13 @@ struct WorkoutView: View {
                 .buttonStyle(.borderedProminent)
                 if !showPrompt {
                     List(workoutDays.workoutDays.indices, id: \.self) { index in
- 
+                        
                         NavigationLink(destination: DayView(name: self.workoutDays.workoutDays[index].name, exerciseViewModel: self.workoutDays.workoutDays[index].exerciseViewModel, onMutation: onMutation)) {
                             DayRow(name: self.workoutDays.workoutDays[index].name, index: index, viewModel: workoutDays, onMutation: onMutation)
                         }
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.white)
-                            .foregroundColor(.black)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.white)
+                        .foregroundColor(.black)
                         
                     }
                     .listStyle(PlainListStyle())
@@ -280,10 +284,10 @@ class ExerciseViewModel: ObservableObject, Codable {
     @Published var exercises: [Exercise] = []
     
     func updateAllExerciseDetails() {
-            for exercise in exercises {
-                exercise.exerciseViewModels.updatePreviousValues()
-            }
+        for exercise in exercises {
+            exercise.exerciseViewModels.updatePreviousValues()
         }
+    }
     
     init() {
         
@@ -355,10 +359,10 @@ struct DayView: View {
     @State var showPrompt: Bool = false
     @ObservedObject var exerciseViewModel: ExerciseViewModel
     @EnvironmentObject var globalData: GlobalData
-
+    
     var onMutation: () -> Void
     @FocusState var nameIsFocused: Bool
-
+    
     
     var body: some View {
         ZStack {
@@ -377,6 +381,7 @@ struct DayView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 Button(action: {
+                    var d = ExerciseDayHistory(name: name)
                     for i in 0..<exerciseViewModel.exercises.count {
                         var e = ExerciseHistory(name: exerciseViewModel.exercises[i].name)
                         for j in 0..<exerciseViewModel.exercises[i].exerciseViewModels.exerciseDetail.count {
@@ -384,11 +389,13 @@ struct DayView: View {
                             let add = ExerciseRowHistory(set: Int(f.setsText)!, kg: Double(f.kgText) ?? 0, reps: Int(f.repsText) ?? 0)
                             e.rows.append(add)
                         }
-
                         
-                        globalData.myArray.append(e)
+                        
+//                        globalData.myArray.append(e)
+                        d.exercises.append(e)
                         
                     }
+                    globalData.myArray.append(d)
                     exerciseViewModel.updateAllExerciseDetails()
                     onMutation()
                     globalData.saveWorkoutDays()
@@ -404,13 +411,13 @@ struct DayView: View {
                 .cornerRadius(5)
                 if !showPrompt {
                     List(exerciseViewModel.exercises.indices, id: \.self) {index in
-
+                        
                         ExerciseRowView(name: self.exerciseViewModel.exercises[index].name, nameIsFocused: _nameIsFocused, exerciseDetails: self.exerciseViewModel.exercises[index].exerciseViewModels,
                                         onMutation: onMutation, index: index, viewModel: self.exerciseViewModel)
-                                .listRowInsets(EdgeInsets())
-                                .listRowBackground(Color.white)
-                                .foregroundColor(Color.black)
-                                .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.white)
+                        .foregroundColor(Color.black)
+                        .listRowSeparator(.hidden)
                         
                     }
                     .listStyle(PlainListStyle())
@@ -439,15 +446,15 @@ class ExerciseRowDetailViewModel: ObservableObject, Codable {
     @Published var exerciseDetail: [ExerciseDetail] = []
     
     func updatePreviousValues() {
-            for i in 0..<exerciseDetail.count {
-
-                    exerciseDetail[i].prevKg = exerciseDetail[i].kgText
-                    exerciseDetail[i].prevReps = exerciseDetail[i].repsText
-                exerciseDetail[i].kgText = ""
-                exerciseDetail[i].repsText = ""
-                
-            }
+        for i in 0..<exerciseDetail.count {
+            
+            exerciseDetail[i].prevKg = exerciseDetail[i].kgText
+            exerciseDetail[i].prevReps = exerciseDetail[i].repsText
+            exerciseDetail[i].kgText = ""
+            exerciseDetail[i].repsText = ""
+            
         }
+    }
     
     init() {
         
@@ -542,7 +549,7 @@ struct ExerciseRowDetail: View {
 struct ExerciseRowView: View {
     @State var name: String = ""
     @FocusState var nameIsFocused: Bool
-
+    
     @ObservedObject var exerciseDetails: ExerciseRowDetailViewModel
     var onMutation: () -> Void
     var index: Int
@@ -552,8 +559,8 @@ struct ExerciseRowView: View {
             HStack {
                 Text("\(name)")
                     .fontWeight(.bold)
-                .foregroundColor(.blue)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.blue)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "trash")
                     .onTapGesture {
                         viewModel.exercises.remove(at: index)
@@ -585,9 +592,9 @@ struct ExerciseRowView: View {
                     .frame(width: 50, alignment: .center)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-                ForEach($exerciseDetails.exerciseDetail) {$item in
-                    ExerciseRowDetail(item: $item, nameIsFocused: _nameIsFocused, onMutation: onMutation)
-                }
+            ForEach($exerciseDetails.exerciseDetail) {$item in
+                ExerciseRowDetail(item: $item, nameIsFocused: _nameIsFocused, onMutation: onMutation)
+            }
             
             Button(action: {
                 exerciseDetails.addItem()
@@ -605,12 +612,16 @@ struct ExerciseRowView: View {
 
 
 
-
+struct ExerciseDayHistory: Codable, Identifiable {
+    var id = UUID()
+    var name: String
+    var exercises: [ExerciseHistory] = []
+    var date = Date()
+}
 struct ExerciseHistory: Codable, Identifiable {
     var id = UUID()
     var name: String
     var rows: [ExerciseRowHistory] = []
-    var date = Date()
 }
 
 struct ExerciseRowHistory: Codable, Identifiable {
@@ -664,69 +675,35 @@ struct DayRow: View {
 }
 
 struct ContentView: View {
-    @StateObject private var workoutDayViewModel = WorkoutDayViewModel()
-    @State private var showPrompt = false
     @StateObject var globalData = GlobalData()
-
     
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                VStack() {
-                    Text("Start Workout")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.black)
-                    Button(action: handleNewWorkoutDayClick) {
-                        Text("New Workout Plan")
-                            .fontWeight(.bold)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    if !showPrompt {
-                        
-                        List(workoutDayViewModel.workoutDays.indices, id: \.self) {index in
-                            NavigationLink(destination: WorkoutView(name: self.workoutDayViewModel.workoutDays[index].name, workoutDays: self.workoutDayViewModel.workoutDays[index].days, onMutation: workoutDayViewModel.saveWorkoutDays)) {
-                                WorkoutPlanRow(name: self.workoutDayViewModel.workoutDays[index].name, index: index, viewModel: workoutDayViewModel)
-                                       
-                            }
-                                .listRowBackground(Color.white)
-                                .listRowInsets(EdgeInsets())
-                                .foregroundColor(.black)
-
-                        }
-                        .listStyle(PlainListStyle())
-                        
-                    }
+    var body: some View
+    {
+        TabView
+        {
+            WorkoutPlanView()
+                .tabItem {
+                    Label("Home", systemImage: "house")
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(.horizontal)
-                .padding(.top, 38)
-                .background(showPrompt ? .gray.opacity(0.5) : .white)
-                
-                if showPrompt {
-                    NewWorkoutPlanPrompt(showPrompt: $showPrompt, workoutDayViewModel: workoutDayViewModel)
-                        .frame(maxWidth: UIScreen.main.bounds.width * 0.85)
-                        .padding([.horizontal, .top])
-                        .background(.white)
-                        .cornerRadius(15)
+            WorkoutHistoryView()
+                .tabItem {
+                    Label("History", systemImage: "hourglass")
                 }
-            }
         }
         .environmentObject(globalData)
     }
     
     
     
-    func handleNewWorkoutDayClick() {
-        showPrompt = true
-    }
+    
 }
+
 
 #Preview {
     ContentView()
-        .environment(\.colorScheme, .light) // Force light mode
+        .environment(\.colorScheme, .light)
+    
+    // Force light mode
     
 }
 
