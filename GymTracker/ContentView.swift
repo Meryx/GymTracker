@@ -702,9 +702,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(\.colorScheme, .light)
-    
-    // Force light mode
-    
 }
 
 

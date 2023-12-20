@@ -10,7 +10,13 @@ import SwiftUI
 struct WorkoutHistoryView: View {
     @EnvironmentObject var globalData: GlobalData
     var body: some View {
-        WorkoutHistoryPaneView(history: globalData.myArray[0])
+        
+        VStack{
+            ForEach(globalData.myArray.indices, id: \.self) {index in
+                WorkoutHistoryPaneView(history: globalData.myArray[globalData.myArray.endIndex - 1 - index])
+            }
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 

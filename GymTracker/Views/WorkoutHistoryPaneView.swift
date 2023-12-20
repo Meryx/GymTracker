@@ -12,11 +12,11 @@ struct WorkoutHistoryPaneView: View {
     var history: ExerciseDayHistory
     var body: some View {
         VStack {
-            Text("Afternoon Workout")
+            Text(history.name)
                 .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding([.top, .leading], 5)
-            Text(Date().formatted())
+            Text(history.date.formatted())
                 .padding(.top, 3)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding([.leading], 5)
