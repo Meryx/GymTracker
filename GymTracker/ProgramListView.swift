@@ -7,9 +7,16 @@
 
 import SwiftUI
 
+struct ProgramView: View {
+    @State var name: String
+    var body: some View {
+        Text(name)
+    }
+}
+
 struct ProgramListView: View {
     @EnvironmentObject private var databaseManager: DatabaseManager
-    @State private var programs: [Program] = []
+    @ObservedObject private var viewModel = ProgramListViewModel()
     var body: some View {
         VStack {
             Text("Program List")
@@ -17,20 +24,24 @@ struct ProgramListView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Button(action: {
-                print("hello")
+                self.databaseManager.addProgramIfTableEmpty(name: "demo")
+                self.viewModel.programs = self.databaseManager.fetchPrograms()
             }, label: {
                 Text("+ New Program")
                     .frame(maxWidth: .infinity)
                     .fontWeight(.bold)
             })
             .buttonStyle(.borderedProminent)
-            List(programs.indices, id: \.self)
+            List(viewModel.programs.indices, id: \.self)
             { index in
-                Text(programs[index].name)
+                NavigationLink(destination: ProgramView(name: viewModel.programs[index].name))
+                {
+                    Text(viewModel.programs[index].name)
+                }
             }
             .listStyle(PlainListStyle())
             .onAppear(perform: {
-                self.programs = self.databaseManager.fetchPrograms()
+                self.viewModel.programs = self.databaseManager.fetchPrograms()
             })
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)

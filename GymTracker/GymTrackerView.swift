@@ -10,8 +10,10 @@ import SwiftUI
 struct GymTrackerView: View {
     var body: some View {
         VStack {
-            ProgramListView()
-                .padding(.horizontal)
+            NavigationStack {
+                ProgramListView()
+                    .padding(.horizontal)
+            }
         }
         .frame(maxHeight: .infinity, alignment: .topLeading)
     }

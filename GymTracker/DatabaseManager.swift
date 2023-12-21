@@ -16,30 +16,52 @@ class DatabaseManager: ObservableObject {
     }
     
     private func setupDatabase() {
-        do {
-            let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-            print("Database Path: \(path)/db.sqlite3") // Print the database path
-            db = try Connection("\(path)/db.sqlite3")
-            createTables()
+        let fileManager = FileManager.default
+        let databaseFilePath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)/db.sqlite3"
+        
+        if fileManager.fileExists(atPath: databaseFilePath) {
+            do {
+                try fileManager.removeItem(atPath: databaseFilePath)
+                print("Existing database deleted.")
+            } catch {
+                print("Error deleting database: \(error)")
+            }
         }
-        catch {
+        
+        do {
+            db = try Connection(databaseFilePath)
+            createTables()
+        } catch {
             print("Unable to establish connection to the database: \(error)")
         }
     }
+
     private func createTables() {
         let programs = Table("programs")
-        let id = Expression<Int64>("id")
-        let name = Expression<String>("name")
-        
+        let programsID = Expression<Int64>("id")
+        let programsName = Expression<String>("name")
+
+        let days = Table("days")
+        let daysID = Expression<Int64>("id")
+        let daysName = Expression<String>("name")
+        let daysProgramID = Expression<Int64>("program_id")
+
         do {
             try db?.run(programs.create { t in
-                t.column(id, primaryKey: true)
-                t.column(name)
+                t.column(programsID, primaryKey: .autoincrement)
+                t.column(programsName)
+            })
+
+            try db?.run(days.create { t in
+                t.column(daysID, primaryKey: .autoincrement)
+                t.column(daysName)
+                t.column(daysProgramID, references: programs, programsID)
             })
         } catch {
-            print("Unable to create table: \(error)")
+            print("Unable to create tables: \(error)")
         }
     }
+
     
     func fetchPrograms() -> [Program] {
         let programsTable = Table("programs")
@@ -62,13 +84,24 @@ class DatabaseManager: ObservableObject {
         let programs = Table("programs")
         let nameColumn = Expression<String>("name")
 
+        let days = Table("days")
+        let daysName = Expression<String>("name")
+        let daysProgramID = Expression<Int64>("program_id")
+
         do {
-            // Check if any row exists
-            if let count = try db?.scalar(programs.count), count == 0 {
-                // If no rows exist, insert a new row
-                let insert = programs.insert(nameColumn <- name)
-                try db?.run(insert)
-                print("New row added as the table was empty.")
+            // Check if any program row exists
+            if let programCount = try db?.scalar(programs.count), programCount == 0 {
+                // If no program exists, insert a new program
+                let insertProgram = programs.insert(nameColumn <- name)
+                let programId = try db?.run(insertProgram)
+                print("New program added as the table was empty.")
+
+                // Insert a new day associated with the newly added program
+                if let programId = programId {
+                    let insertDay = days.insert(daysName <- "leg day", daysProgramID <- programId)
+                    try db?.run(insertDay)
+                    print("New day 'leg day' added to the program.")
+                }
             } else {
                 // If the table is not empty, just return
                 print("The table is not empty. No row added.")
@@ -77,6 +110,11 @@ class DatabaseManager: ObservableObject {
             print("Database error: \(error)")
         }
     }
+
+}
+
+class ProgramListViewModel: ObservableObject {
+    @Published var programs: [Program] = []
 }
 
 struct Program {
