@@ -23,6 +23,10 @@
 		E473017E2B307C04004CFBE9 /* WorkoutPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473017D2B307C04004CFBE9 /* WorkoutPlanViewModel.swift */; };
 		E47301812B31C868004CFBE9 /* WorkoutHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47301802B31C868004CFBE9 /* WorkoutHistoryView.swift */; };
 		E47301852B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47301842B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift */; };
+		E47301882B344123004CFBE9 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = E47301872B344123004CFBE9 /* SQLite */; };
+		E473018A2B344261004CFBE9 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47301892B344261004CFBE9 /* DatabaseManager.swift */; };
+		E473018C2B344499004CFBE9 /* GymTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473018B2B344499004CFBE9 /* GymTrackerView.swift */; };
+		E473018E2B344CDC004CFBE9 /* ProgramListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473018D2B344CDC004CFBE9 /* ProgramListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +66,9 @@
 		E473017D2B307C04004CFBE9 /* WorkoutPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlanViewModel.swift; sourceTree = "<group>"; };
 		E47301802B31C868004CFBE9 /* WorkoutHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHistoryView.swift; sourceTree = "<group>"; };
 		E47301842B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHistoryPaneView.swift; sourceTree = "<group>"; };
+		E47301892B344261004CFBE9 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		E473018B2B344499004CFBE9 /* GymTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTrackerView.swift; sourceTree = "<group>"; };
+		E473018D2B344CDC004CFBE9 /* ProgramListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E47301882B344123004CFBE9 /* SQLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +129,9 @@
 				E4126D722B126BDB0046F233 /* GymTracker.xcdatamodeld */,
 				E4126D6D2B126BDB0046F233 /* Preview Content */,
 				E47301752B3032E3004CFBE9 /* Views */,
+				E47301892B344261004CFBE9 /* DatabaseManager.swift */,
+				E473018B2B344499004CFBE9 /* GymTrackerView.swift */,
+				E473018D2B344CDC004CFBE9 /* ProgramListView.swift */,
 			);
 			path = GymTracker;
 			sourceTree = "<group>";
@@ -194,6 +205,9 @@
 			dependencies = (
 			);
 			name = GymTracker;
+			packageProductDependencies = (
+				E47301872B344123004CFBE9 /* SQLite */,
+			);
 			productName = GymTracker;
 			productReference = E4126D642B126BDA0046F233 /* GymTracker.app */;
 			productType = "com.apple.product-type.application";
@@ -266,6 +280,9 @@
 				Base,
 			);
 			mainGroup = E4126D5B2B126BD90046F233;
+			packageReferences = (
+				E47301862B344123004CFBE9 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+			);
 			productRefGroup = E4126D652B126BDA0046F233 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -313,9 +330,12 @@
 				E47301792B307895004CFBE9 /* WorkoutPlanPromptView.swift in Sources */,
 				E473017E2B307C04004CFBE9 /* WorkoutPlanViewModel.swift in Sources */,
 				E4126D742B126BDB0046F233 /* GymTracker.xcdatamodeld in Sources */,
+				E473018E2B344CDC004CFBE9 /* ProgramListView.swift in Sources */,
 				E4126D712B126BDB0046F233 /* Persistence.swift in Sources */,
+				E473018C2B344499004CFBE9 /* GymTrackerView.swift in Sources */,
 				E47301852B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift in Sources */,
 				E47301742B3032DB004CFBE9 /* WorkoutPlanView.swift in Sources */,
+				E473018A2B344261004CFBE9 /* DatabaseManager.swift in Sources */,
 				E4126D6A2B126BDA0046F233 /* ContentView.swift in Sources */,
 				E4126D682B126BDA0046F233 /* GymTrackerApp.swift in Sources */,
 				E47301812B31C868004CFBE9 /* WorkoutHistoryView.swift in Sources */,
@@ -647,6 +667,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E47301862B344123004CFBE9 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.14.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E47301872B344123004CFBE9 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E47301862B344123004CFBE9 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		E4126D722B126BDB0046F233 /* GymTracker.xcdatamodeld */ = {

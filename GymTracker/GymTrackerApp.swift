@@ -4,11 +4,13 @@ import SwiftUI
 
 @main
 struct GymTrackerApp: App {
+    let databaseManager = DatabaseManager()
     
     var body: some Scene {
         WindowGroup {
-            WorkoutPlanView()
-                .environment(\.colorScheme, .light) // Force light mode
+            GymTrackerView()
+                .environment(\.colorScheme, .light)
+                .environmentObject(databaseManager)
         }
     }
 }
