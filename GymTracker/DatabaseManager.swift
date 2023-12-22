@@ -42,9 +42,14 @@ class DatabaseManager: ObservableObject {
         let programsName = Expression<String>("name")
 
         let days = Table("days")
-        let daysID = Expression<Int64>("id")
-        let daysName = Expression<String>("name")
+        let daysID = Expression<Int64>("dayId")
+        let daysName = Expression<String>("dayName")
         let daysProgramID = Expression<Int64>("program_id")
+        
+        let exercises = Table("exercises")
+        let exerciseID = Expression<Int64>("exerciseID")
+        let exerciseName = Expression<String>("exerciseName")
+        let exerciseDayID = Expression<Int64>("day_id")
 
         do {
             try db?.run(programs.create { t in
@@ -56,6 +61,12 @@ class DatabaseManager: ObservableObject {
                 t.column(daysID, primaryKey: .autoincrement)
                 t.column(daysName)
                 t.column(daysProgramID, references: programs, programsID)
+            })
+            
+            try db?.run(exercises.create { t in
+                t.column(exerciseID, primaryKey: .autoincrement)
+                t.column(exerciseName)
+                t.column(exerciseDayID, references: days, daysID)
             })
         } catch {
             print("Unable to create tables: \(error)")
@@ -80,13 +91,83 @@ class DatabaseManager: ObservableObject {
         return programs
     }
     
+    func fetchExercisesByDayId(id: Int64) -> [Exercise] {
+        let daysTable = Table("days")
+        let exercisesTable = Table("exercises")
+        
+        let dayID = Expression<Int64>("dayId")
+        let dayName = Expression<String>("dayName")
+        
+        let exerciseID = Expression<Int64>("exerciseId")
+        let exerciseName = Expression<String>("exerciseName")
+        let exerciseDayID = Expression<Int64>("day_id")
+        
+        var exercises: [Exercise] = []
+        
+        do {
+            let query = exercisesTable
+                .join(daysTable, on: exerciseDayID == daysTable[dayID])
+                .filter(dayID == id)
+                .select(exercisesTable[exerciseName], exercisesTable[exerciseID], daysTable[dayName])
+            
+            for exercise in try db!.prepare(query) {
+                let id = exercise[exerciseID]
+                let name = exercise[exerciseName]
+                let dName = exercise[dayName]
+                exercises.append(Exercise(exerciseId: id, exerciseName: name, dayName: dName))
+            }
+        } catch {
+            print("\(error)")
+        }
+        return exercises
+    }
+    
+    func fetchWorkoutDaysByProgramId(id: Int64) -> [WorkoutDay] {
+        let programsTable = Table("programs")
+        let daysTable = Table("days")
+
+        let programsID = Expression<Int64>("id")
+        let programsName = Expression<String>("name")
+        
+        let daysID = Expression<Int64>("dayId")
+        let daysName = Expression<String>("dayName")
+        let daysProgramID = Expression<Int64>("program_id")
+
+        var days: [WorkoutDay] = []
+
+        do {
+            let query = daysTable
+                .join(programsTable, on: daysProgramID == programsTable[programsID])
+                .filter(programsID == id)
+                .select(daysTable[daysID], daysTable[daysName], programsTable[programsName])
+
+            for day in try db!.prepare(query) {
+                let id = day[daysID]
+                let name = day[daysName]
+                let progName = day[programsName]
+                days.append(WorkoutDay(dayId: id, dayName: name, programName: progName))
+            }
+        } catch {
+            print("Unable to fetch workout days: \(error)")
+        }
+        
+        print(days)
+
+        return days
+    }
+
+    
     func addProgramIfTableEmpty(name: String) {
         let programs = Table("programs")
         let nameColumn = Expression<String>("name")
 
         let days = Table("days")
-        let daysName = Expression<String>("name")
+        let daysName = Expression<String>("dayName")
         let daysProgramID = Expression<Int64>("program_id")
+        
+        let exercises = Table("exercises")
+        let exerciseName = Expression<String>("exerciseName")
+        let exerciseDayID = Expression<Int64>("day_id")
 
         do {
             // Check if any program row exists
@@ -99,9 +180,17 @@ class DatabaseManager: ObservableObject {
                 // Insert a new day associated with the newly added program
                 if let programId = programId {
                     let insertDay = days.insert(daysName <- "leg day", daysProgramID <- programId)
-                    try db?.run(insertDay)
+                    let dayID = try db?.run(insertDay)
+                    
+                    if let dayID = dayID {
+                        let insertExercise = exercises.insert(exerciseName <- "Squat", exerciseDayID <- dayID)
+                        try db?.run(insertExercise)
+                    }
+                    
+                    
                     print("New day 'leg day' added to the program.")
                 }
+                
             } else {
                 // If the table is not empty, just return
                 print("The table is not empty. No row added.")
@@ -121,4 +210,16 @@ struct Program {
     let id: Int64
     let name: String
     // Add other fields as necessary
+}
+
+struct WorkoutDay {
+    let dayId: Int64
+    let dayName: String
+    let programName: String
+}
+
+struct Exercise {
+    let exerciseId: Int64
+    let exerciseName: String
+    let dayName: String
 }

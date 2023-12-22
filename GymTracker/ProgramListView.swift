@@ -7,10 +7,41 @@
 
 import SwiftUI
 
-struct ProgramView: View {
+struct DayView: View {
+    @EnvironmentObject private var databaseManager: DatabaseManager
     @State var name: String
+    @State var dayID: Int64
+    @State var exercises: [Exercise] = []
+    
     var body: some View {
-        Text(name)
+        List(exercises.indices, id: \.self)
+        { index in
+            Text(exercises[index].exerciseName)
+        }
+        .onAppear(perform: {
+            exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
+        })
+    }
+}
+
+struct ProgramView: View {
+    @EnvironmentObject private var databaseManager: DatabaseManager
+    @State var name: String
+    @State var programsID: Int64
+    @State var workoutDays: [WorkoutDay] = []
+    
+    
+    var body: some View {
+        List(workoutDays.indices, id: \.self)
+        { index in
+            NavigationLink(destination: DayView(name: workoutDays[index].dayName, dayID: workoutDays[index].dayId))
+            {
+                Text(workoutDays[index].dayName)
+            }
+        }
+        .onAppear(perform: {
+            workoutDays = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
+        })
     }
 }
 
@@ -34,7 +65,7 @@ struct ProgramListView: View {
             .buttonStyle(.borderedProminent)
             List(viewModel.programs.indices, id: \.self)
             { index in
-                NavigationLink(destination: ProgramView(name: viewModel.programs[index].name))
+                NavigationLink(destination: ProgramView(name: viewModel.programs[index].name, programsID: viewModel.programs[index].id))
                 {
                     Text(viewModel.programs[index].name)
                 }

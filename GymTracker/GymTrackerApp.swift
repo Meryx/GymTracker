@@ -15,6 +15,6 @@ struct GymTrackerApp: App {
     }
 }
 
-#Preview {
-    WorkoutPlanView()
-}
+//#Preview {
+//    WorkoutPlanView()
+//}
