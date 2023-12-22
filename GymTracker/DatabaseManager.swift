@@ -155,6 +155,46 @@ class DatabaseManager: ObservableObject {
 
         return days
     }
+    
+    func addExercise(name: String, id: Int64) {
+        let exerciseTable = Table("exercises")
+        let nameColumn = Expression<String>("exerciseName")
+        let idColumn = Expression<Int64>("day_id")
+        
+        let insertExercise = exerciseTable.insert(nameColumn <- name, idColumn <- id)
+        
+        do {
+            try db?.run(insertExercise)
+        } catch {
+            print("\(error)")
+        }
+    }
+    
+    func addDay(name: String, id: Int64) {
+        let daysTable = Table("days")
+        let nameColumn = Expression<String>("dayName")
+        let idColumn = Expression<Int64>("program_id")
+        
+        let insertDay = daysTable.insert(nameColumn <- name, idColumn <- id)
+        
+        do {
+            try db?.run(insertDay)
+        } catch {
+            print("\(error)")
+        }
+    }
+    
+    func addProgram(name: String) {
+        let programs = Table("programs")
+        let nameColumn = Expression<String>("name")
+        
+        do {
+            let insertProgram = programs.insert(nameColumn <- name)
+            try db?.run(insertProgram)
+        } catch {
+            print("\(error)")
+        }
+    }
 
     
     func addProgramIfTableEmpty(name: String) {
@@ -204,6 +244,8 @@ class DatabaseManager: ObservableObject {
 
 class ProgramListViewModel: ObservableObject {
     @Published var programs: [Program] = []
+    @Published var days: [WorkoutDay] = []
+    @Published var exercises: [Exercise] = []
 }
 
 struct Program {
