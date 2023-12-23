@@ -50,6 +50,12 @@ class DatabaseManager: ObservableObject {
         let exerciseID = Expression<Int64>("exerciseID")
         let exerciseName = Expression<String>("exerciseName")
         let exerciseDayID = Expression<Int64>("day_id")
+        
+        let sets = Table("sets")
+        let setID = Expression<Int64>("setID")
+        let setWeight = Expression<Int64>("setWeight")
+        let setReps = Expression<Int64>("setReps")
+        let setExerciseID = Expression<Int64>("exercise_id")
 
         do {
             try db?.run(programs.create { t in
@@ -67,6 +73,13 @@ class DatabaseManager: ObservableObject {
                 t.column(exerciseID, primaryKey: .autoincrement)
                 t.column(exerciseName)
                 t.column(exerciseDayID, references: days, daysID)
+            })
+            
+            try db?.run(sets.create { t in
+                t.column(setID, primaryKey: .autoincrement)
+                t.column(setWeight)
+                t.column(setReps)
+                t.column(setExerciseID, references: exercises, exerciseID)
             })
         } catch {
             print("Unable to create tables: \(error)")
@@ -156,6 +169,7 @@ class DatabaseManager: ObservableObject {
         return days
     }
     
+    
     func addExercise(name: String, id: Int64) {
         let exerciseTable = Table("exercises")
         let nameColumn = Expression<String>("exerciseName")
@@ -191,6 +205,20 @@ class DatabaseManager: ObservableObject {
         do {
             let insertProgram = programs.insert(nameColumn <- name)
             try db?.run(insertProgram)
+        } catch {
+            print("\(error)")
+        }
+    }
+    
+    func addSet(setD: SetDetail) {
+        let sets = Table("sets")
+        let setWeight = Expression<Int64>("setWeight")
+        let setReps = Expression<Int64>("setReps")
+        let setExerciseId = Expression<Int64>("exercise_id")
+        
+        do {
+            let insertSet = sets.insert(setWeight <- Int64(setD.setWeight), setReps <- setD.setReps, setExerciseId <- setD.setExerciseId)
+            try db?.run(insertSet)
         } catch {
             print("\(error)")
         }
@@ -242,6 +270,10 @@ class DatabaseManager: ObservableObject {
 
 }
 
+class ExerciseRowViewModel: ObservableObject {
+    @Published var sets: [SetDetail] = []
+}
+
 class ProgramListViewModel: ObservableObject {
     @Published var programs: [Program] = []
     @Published var days: [WorkoutDay] = []
@@ -264,4 +296,11 @@ struct Exercise {
     let exerciseId: Int64
     let exerciseName: String
     let dayName: String
+}
+
+struct SetDetail {
+    let setId: Int64
+    var setWeight: Double
+    var setReps: Int64
+    let setExerciseId: Int64
 }
