@@ -16,17 +16,24 @@ class DatabaseManager: ObservableObject {
     }
     
     private func setupDatabase() {
-        let fileManager = FileManager.default
-        let databaseFilePath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)/db.sqlite3"
         
-        if fileManager.fileExists(atPath: databaseFilePath) {
-            do {
-                try fileManager.removeItem(atPath: databaseFilePath)
-                print("Existing database deleted.")
-            } catch {
-                print("Error deleting database: \(error)")
-            }
-        }
+        
+
+        
+        
+                let databaseFilePath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)/db.sqlite3"
+        
+//        let fileManager = FileManager.default
+//                
+//                if fileManager.fileExists(atPath: databaseFilePath) {
+//                    do {
+//                        try fileManager.removeItem(atPath: databaseFilePath)
+//                        print("Existing database deleted.")
+//                    } catch {
+//                        print("Error deleting database: \(error)")
+//                    }
+//                }
+        
         
         do {
             db = try Connection(databaseFilePath)
@@ -53,7 +60,7 @@ class DatabaseManager: ObservableObject {
         
         let sets = Table("sets")
         let setID = Expression<Int64>("setID")
-        let setWeight = Expression<Int64>("setWeight")
+        let setWeight = Expression<Double>("setWeight")
         let setReps = Expression<Int64>("setReps")
         let setExerciseID = Expression<Int64>("exercise_id")
 
@@ -135,6 +142,44 @@ class DatabaseManager: ObservableObject {
         return exercises
     }
     
+    func fetchSetByDayId(id: Int64) -> [SetDetail] {
+        let daysTable = Table("days")
+        let exercisesTable = Table("exercises")
+        let setsTable = Table("sets")
+        
+        let dayID = Expression<Int64>("dayId")
+        
+        let exerciseID = Expression<Int64>("exerciseId")
+        let exerciseDayID = Expression<Int64>("day_id")
+        
+        let setID = Expression<Int64>("setID")
+        let setWeight = Expression<Double>("setWeight")
+        let setReps = Expression<Int64>("setReps")
+        let setExerciseID = Expression<Int64>("exercise_id")
+
+        var setDetails: [SetDetail] = []
+        
+        do {
+            let query = setsTable
+                .join(exercisesTable, on: setExerciseID == exercisesTable[exerciseID])
+                .join(daysTable, on: exerciseDayID == daysTable[dayID])
+                .filter(dayID == id)
+                .select(setsTable[setID], setsTable[setWeight], setsTable[setReps], setsTable[setExerciseID])
+
+            for set in try db!.prepare(query) {
+                let setId = set[setID]
+                let weight = set[setWeight]
+                let reps = set[setReps]
+                let exerciseId = set[setExerciseID]
+
+                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, setExerciseId: exerciseId))
+            }
+        } catch {
+            print("\(error)")
+        }
+        return setDetails
+    }
+    
     func fetchWorkoutDaysByProgramId(id: Int64) -> [WorkoutDay] {
         let programsTable = Table("programs")
         let daysTable = Table("days")
@@ -212,12 +257,12 @@ class DatabaseManager: ObservableObject {
     
     func addSet(setD: SetDetail) {
         let sets = Table("sets")
-        let setWeight = Expression<Int64>("setWeight")
+        let setWeight = Expression<Double>("setWeight")
         let setReps = Expression<Int64>("setReps")
         let setExerciseId = Expression<Int64>("exercise_id")
         
         do {
-            let insertSet = sets.insert(setWeight <- Int64(setD.setWeight), setReps <- setD.setReps, setExerciseId <- setD.setExerciseId)
+            let insertSet = sets.insert(setWeight <- Double(setD.setWeight), setReps <- setD.setReps, setExerciseId <- setD.setExerciseId)
             try db?.run(insertSet)
         } catch {
             print("\(error)")
@@ -270,14 +315,13 @@ class DatabaseManager: ObservableObject {
 
 }
 
-class ExerciseRowViewModel: ObservableObject {
-    @Published var sets: [SetDetail] = []
-}
 
-class ProgramListViewModel: ObservableObject {
+
+class ProgramListViewModel: ObservableObject, Identifiable {
     @Published var programs: [Program] = []
     @Published var days: [WorkoutDay] = []
     @Published var exercises: [Exercise] = []
+    @Published var sets: [SetDetail] = []
 }
 
 struct Program {

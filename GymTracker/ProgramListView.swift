@@ -106,8 +106,6 @@ struct DayView: View {
     @State var name: String
     @State var dayID: Int64
     @State var showPrompt: Bool = false
-    @State var exerciseViewModels: [ExerciseRowViewModel] = []
-    @State var hasInit = false
     
     var body: some View {
         ZStack {
@@ -118,7 +116,6 @@ struct DayView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button(action: {
                     showPrompt = true
-                    exerciseViewModels.append(ExerciseRowViewModel())
                 }, label: {
                     Text("+ New Exercise")
                         .frame(maxWidth: .infinity)
@@ -126,30 +123,31 @@ struct DayView: View {
                 })
                 .buttonStyle(.borderedProminent)
                 Button(action: {
-                    for exerciseViewModel in exerciseViewModels {
-                        for setD in exerciseViewModel.sets {
+
+                        for setD in viewModel.sets {
                             databaseManager.addSet(setD: setD)
                         }
-                    }
+
                 }, label: {
                     Text("Save Workout")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)
                 })
                 .padding(6)
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                .background(Color.green)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 List(viewModel.exercises.indices, id: \.self)
-                    { index in
-                        ExerciseRowView(name: viewModel.exercises[index].exerciseName, viewModel: ExerciseViewModels(id: index), id: viewModel.exercises[index].exerciseId)
-                            .padding(.top)
-                    }
-                    .onAppear(perform: {
-                        viewModel.exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
-                    })
-                    .listStyle(PlainListStyle())
+                { index in
+                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId)
+                        .padding(.top)
+                }
+                .onAppear(perform: {
+                    viewModel.exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
+                    viewModel.sets = self.databaseManager.fetchSetByDayId(id: self.dayID)
+                })
+                .listStyle(PlainListStyle())
             }
             if showPrompt {
                 AddExerciseView(show: $showPrompt, id: dayID)
@@ -253,7 +251,7 @@ struct AddProgramPrompt: View {
     @EnvironmentObject var viewModel: ProgramListViewModel
     @State var name: String = ""
     @Binding var show: Bool
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -289,7 +287,7 @@ struct AddProgramPrompt: View {
         .frame(height: 150, alignment: .topLeading)
         .background(.white)
         .cornerRadius(15)
-
+        
     }
 }
 
@@ -297,14 +295,13 @@ struct ExerciseRowView: View {
     @State var name: String = ""
     @State var sets: [SetDetail] = []
     @State var counter: Int = 1
-    @ObservedObject var viewModel: ExerciseRowViewModel
     @State var id: Int64
+    @EnvironmentObject private var viewModel: ProgramListViewModel
     
-//    @ObservedObject var exerciseDetails: ExerciseRowDetailViewModel
-//    var onMutation: () -> Void
-//    var index: Int
-//    var viewModel: ExerciseViewModel
+    
+    
     var body: some View {
+        
         VStack(alignment: .leading) {
             HStack {
                 Text("\(name)")
@@ -313,8 +310,8 @@ struct ExerciseRowView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "trash")
                     .onTapGesture {
-//                        viewModel.exercises.remove(at: index)
-//                        onMutation()
+                        //                        viewModel.exercises.remove(at: index)
+                        //                        onMutation()
                     }
                     .padding(5)
                     .background(Color.red)
@@ -343,13 +340,14 @@ struct ExerciseRowView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(viewModel.sets.indices, id: \.self) { index in
-                ExerciseRowDetail(viewModel: viewModel, index: index, prevWeight: "", prevReps: "", weight: "", reps: "")
+                if viewModel.sets[index].setExerciseId == id {
+                    ExerciseRowDetail(index: index, prevWeight: "", prevReps: "", weight: String(viewModel.sets[index].setWeight), reps: "")
+                }
             }
+            
             
             Button(action: {
                 viewModel.sets.append(SetDetail(setId: 0, setWeight: 0, setReps: 0, setExerciseId: id))
-//                exerciseDetails.addItem()
-//                onMutation()
             }) {
                 Text("+")
                     .fontWeight(.bold)
@@ -362,8 +360,7 @@ struct ExerciseRowView: View {
 }
 
 struct ExerciseRowDetail: View {
-//    @Binding var item: ExerciseDetail;
-    @ObservedObject var viewModel: ExerciseRowViewModel
+    @EnvironmentObject private var viewModel: ProgramListViewModel
     @State var index: Int
     @State var prevWeight: String
     @State var prevReps: String
@@ -371,8 +368,7 @@ struct ExerciseRowDetail: View {
     @State var reps: String
     @State var strIndex: String
     
-    init(viewModel: ExerciseRowViewModel, index: Int, prevWeight: String, prevReps: String, weight: String, reps: String) {
-        self.viewModel = viewModel
+    init(index: Int, prevWeight: String, prevReps: String, weight: String, reps: String) {
         self.index = index
         self.prevWeight = prevWeight
         self.prevReps = prevReps
@@ -380,8 +376,7 @@ struct ExerciseRowDetail: View {
         self.reps = reps
         self.strIndex = String(index + 1)
     }
-
-//    var onMutation: () -> Void
+    
     var body: some View {
         HStack {
             TextField("", text: $strIndex)
@@ -416,7 +411,7 @@ struct ExerciseRowDetail: View {
                 .cornerRadius(10)
                 .keyboardType(.decimalPad)
                 .onChange(of: weight, {
-                    viewModel.sets[index].setWeight = Double(weight)!
+                    viewModel.sets[index].setWeight = Double(weight) ?? 0.0
                 })
             TextField("", text: $reps)
                 .fontWeight(.bold)
@@ -425,7 +420,7 @@ struct ExerciseRowDetail: View {
                 .background(.gray.opacity(0.5))
                 .cornerRadius(10)
                 .keyboardType(.decimalPad)
-//                .focused($nameIsFocused)
+            //                .focused($nameIsFocused)
             
         }
     }
