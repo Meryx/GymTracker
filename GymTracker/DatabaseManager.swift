@@ -256,6 +256,19 @@ class DatabaseManager: ObservableObject {
         }
     }
     
+    func deleteExercise(id: Int64) {
+        let programs = Table("exercises")
+        let idColumn = Expression<Int64>("exerciseID")
+
+        do {
+            let programToDelete = programs.filter(idColumn == id)
+            let deleteProgram = programToDelete.delete()
+            try db?.run(deleteProgram)
+        } catch {
+            print("Delete error: \(error)")
+        }
+    }
+    
     func addDay(name: String, id: Int64) {
         let daysTable = Table("days")
         let nameColumn = Expression<String>("dayName")
@@ -267,6 +280,19 @@ class DatabaseManager: ObservableObject {
             try db?.run(insertDay)
         } catch {
             print("\(error)")
+        }
+    }
+    
+    func deleteDay(id: Int64) {
+        let programs = Table("days")
+        let idColumn = Expression<Int64>("dayId")
+
+        do {
+            let programToDelete = programs.filter(idColumn == id)
+            let deleteProgram = programToDelete.delete()
+            try db?.run(deleteProgram)
+        } catch {
+            print("Delete error: \(error)")
         }
     }
     

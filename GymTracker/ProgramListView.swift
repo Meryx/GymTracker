@@ -150,7 +150,7 @@ struct DayView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 List(viewModel.exercises.indices, id: \.self) { index in
-                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId)
+                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId, dayId: dayID)
                         .padding(.top)
                 }
                 .id(refreshKey) // Use the dynamic key here
@@ -199,7 +199,19 @@ struct ProgramView: View {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
                         })
                     {
-                        Text(viewModel.days[index].dayName)
+                        HStack {
+                            Text(viewModel.days[index].dayName)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Image(systemName: "trash")
+                                .onTapGesture {
+                                    databaseManager.deleteDay(id: viewModel.days[index].dayId)
+                                    self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
+                                }
+                                .padding(5)
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(5)
+                        }
                     }
                 }
                 .onAppear(perform: {
@@ -317,10 +329,12 @@ struct AddProgramPrompt: View {
 
 struct ExerciseRowView: View {
     @EnvironmentObject private var viewModel: ProgramListViewModel
+    @EnvironmentObject private var databaseManager: DatabaseManager
     @State var name: String = ""
     @State var sets: [SetDetail] = []
     @State var counter: Int = 1
     @State var id: Int64
+    @State var dayId: Int64
     
     
     
@@ -335,8 +349,8 @@ struct ExerciseRowView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "trash")
                     .onTapGesture {
-                        //                        viewModel.exercises.remove(at: index)
-                        //                        onMutation()
+                        databaseManager.deleteExercise(id: id)
+                        viewModel.exercises = databaseManager.fetchExercisesByDayId(id: dayId)
                     }
                     .padding(5)
                     .background(Color.red)
