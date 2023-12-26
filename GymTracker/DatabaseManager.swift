@@ -37,11 +37,27 @@ class DatabaseManager: ObservableObject {
         
         do {
             db = try Connection(databaseFilePath)
+            try db?.execute("PRAGMA foreign_keys = ON;")
             createTables()
         } catch {
             print("Unable to establish connection to the database: \(error)")
         }
     }
+    
+    func printSchema() {
+        do {
+            let statement = try db?.prepare("SELECT name, sql FROM sqlite_master WHERE type='table'")
+            for row in statement! {
+                if let tableName = row[0] as? String, let createStatement = row[1] as? String {
+                    print("Table: \(tableName)")
+                    print("Create Statement: \(createStatement)\n")
+                }
+            }
+        } catch {
+            print("Error printing schema: \(error)")
+        }
+    }
+
 
     private func createTables() {
         let programs = Table("programs")
@@ -75,13 +91,15 @@ class DatabaseManager: ObservableObject {
             try db?.run(days.create { t in
                 t.column(daysID, primaryKey: .autoincrement)
                 t.column(daysName)
-                t.column(daysProgramID, references: programs, programsID)
+                t.column(daysProgramID)
+                t.foreignKey(daysProgramID, references: programs, programsID, delete: .cascade)
             })
             
             try db?.run(exercises.create { t in
                 t.column(exerciseID, primaryKey: .autoincrement)
                 t.column(exerciseName)
-                t.column(exerciseDayID, references: days, daysID)
+                t.column(exerciseDayID)
+                t.foreignKey(exerciseDayID, references: days, daysID, delete: .cascade)
             })
             
             try db?.run(sets.create { t in
@@ -90,7 +108,8 @@ class DatabaseManager: ObservableObject {
                 t.column(setReps)
                 t.column(prevWeight)
                 t.column(prevReps)
-                t.column(setExerciseID, references: exercises, exerciseID)
+                t.column(setExerciseID)
+                t.foreignKey(setExerciseID, references: exercises, exerciseID, delete: .cascade)
             })
         } catch {
             print("Unable to create tables: \(error)")
@@ -214,6 +233,7 @@ class DatabaseManager: ObservableObject {
                 days.append(WorkoutDay(dayId: id, dayName: name, programName: progName))
             }
         } catch {
+            printSchema()
             print("Unable to fetch workout days: \(error)")
         }
         
@@ -247,6 +267,19 @@ class DatabaseManager: ObservableObject {
             try db?.run(insertDay)
         } catch {
             print("\(error)")
+        }
+    }
+    
+    func deleteProgram(id: Int64) {
+        let programs = Table("programs")
+        let idColumn = Expression<Int64>("id")
+
+        do {
+            let programToDelete = programs.filter(idColumn == id)
+            let deleteProgram = programToDelete.delete()
+            try db?.run(deleteProgram)
+        } catch {
+            print("Delete error: \(error)")
         }
     }
     

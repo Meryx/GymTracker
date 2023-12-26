@@ -241,7 +241,19 @@ struct ProgramListView: View {
                         .padding(.horizontal)
                     )
                     {
-                        Text(viewModel.programs[index].name)
+                        HStack {
+                            Text(viewModel.programs[index].name)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Image(systemName: "trash")
+                                .onTapGesture {
+                                    databaseManager.deleteProgram(id: viewModel.programs[index].id)
+                                    self.viewModel.programs = self.databaseManager.fetchPrograms()
+                                }
+                                .padding(5)
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(5)
+                        }
                     }
                 }
                 .listStyle(PlainListStyle())
