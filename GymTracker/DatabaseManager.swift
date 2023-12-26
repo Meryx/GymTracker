@@ -33,7 +33,7 @@ class DatabaseManager: ObservableObject {
 //                        print("Error deleting database: \(error)")
 //                    }
 //                }
-        
+//        
         
         do {
             db = try Connection(databaseFilePath)
@@ -81,6 +81,7 @@ class DatabaseManager: ObservableObject {
         let prevWeight = Expression<Double>("prevWeight")
         let prevReps = Expression<Int64>("prevReps")
         let setExerciseID = Expression<Int64>("exercise_id")
+        let setNum = Expression<Int64>("setNum")
 
         do {
             try db?.run(programs.create { t in
@@ -109,6 +110,7 @@ class DatabaseManager: ObservableObject {
                 t.column(prevWeight)
                 t.column(prevReps)
                 t.column(setExerciseID)
+                t.column(setNum)
                 t.foreignKey(setExerciseID, references: exercises, exerciseID, delete: .cascade)
             })
         } catch {
@@ -181,6 +183,7 @@ class DatabaseManager: ObservableObject {
         let prevReps = Expression<Int64>("prevReps")
         let setReps = Expression<Int64>("setReps")
         let setExerciseID = Expression<Int64>("exercise_id")
+        let setNum = Expression<Int64>("setNum")
 
         var setDetails: [SetDetail] = []
         
@@ -189,7 +192,7 @@ class DatabaseManager: ObservableObject {
                 .join(exercisesTable, on: setExerciseID == exercisesTable[exerciseID])
                 .join(daysTable, on: exerciseDayID == daysTable[dayID])
                 .filter(dayID == id)
-                .select(setsTable[setID], setsTable[setWeight], setsTable[setReps], setsTable[setExerciseID], setsTable[prevWeight], setsTable[prevReps])
+                .select(setsTable[setID], setsTable[setWeight], setsTable[setReps], setsTable[setExerciseID], setsTable[prevWeight], setsTable[prevReps], setsTable[setNum])
 
             for set in try db!.prepare(query) {
                 let setId = set[setID]
@@ -198,8 +201,9 @@ class DatabaseManager: ObservableObject {
                 let pReps = set[prevReps]
                 let reps = set[setReps]
                 let exerciseId = set[setExerciseID]
+                let setN = set[setNum]
 
-                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, prevWeight: pWeight, prevReps: pReps, setExerciseId: exerciseId))
+                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, prevWeight: pWeight, prevReps: pReps, setExerciseId: exerciseId, setNum: Int(setN)))
             }
         } catch {
             print("\(error)")
@@ -355,9 +359,10 @@ class DatabaseManager: ObservableObject {
         let setWeight = Expression<Double>("setWeight")
         let setReps = Expression<Int64>("setReps")
         let setExerciseId = Expression<Int64>("exercise_id")
+        let setNum = Expression<Int64>("setNum")
         
         do {
-            let insertSet = sets.insert(prevWeight <- setD.setWeight, prevReps <- setD.setReps, setExerciseId <- setD.setExerciseId, setWeight <- 0.0, setReps <- 0)
+            let insertSet = sets.insert(prevWeight <- setD.setWeight, prevReps <- setD.setReps, setExerciseId <- setD.setExerciseId, setWeight <- 0.0, setReps <- 0, setNum <- Int64(setD.setNum))
             try db?.run(insertSet)
         } catch {
             print("\(error)")
@@ -449,4 +454,5 @@ struct SetDetail {
     var prevWeight: Double
     var prevReps: Int64
     let setExerciseId: Int64
+    var setNum: Int = 1
 }

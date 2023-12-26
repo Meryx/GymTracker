@@ -12,7 +12,6 @@ struct GymTrackerView: View {
         VStack {
             NavigationStack {
                 ProgramListView()
-                    .padding(.horizontal)
             }
         }
         .frame(maxHeight: .infinity, alignment: .topLeading)

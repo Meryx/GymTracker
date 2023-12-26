@@ -108,6 +108,12 @@ struct DayView: View {
     @State var showPrompt: Bool = false
     @State private var refreshKey = UUID()
     
+    func onMutation(id: Int64) {
+        databaseManager.deleteExercise(id: id)
+        viewModel.exercises = databaseManager.fetchExercisesByDayId(id: dayID)
+        refreshKey = UUID()
+    }
+    
     var body: some View {
         ZStack {
             VStack {
@@ -124,21 +130,21 @@ struct DayView: View {
                 })
                 .buttonStyle(.borderedProminent)
                 Button(action: {
-
-                        for setD in viewModel.sets {
-                            if(setD.setId != -1)
-                            {
-                                databaseManager.modifySet(setD: setD)
-                                continue
-                            }
-                            databaseManager.addSet(setD: setD)
-                            
+                    
+                    for setD in viewModel.sets {
+                        if(setD.setId != -1)
+                        {
+                            databaseManager.modifySet(setD: setD)
+                            continue
                         }
+                        databaseManager.addSet(setD: setD)
+                        
+                    }
                     
                     viewModel.updateSets(databaseManager: databaseManager, dayID: dayID)
                     refreshKey = UUID()
- 
-
+                    
+                    
                 }, label: {
                     Text("Save Workout")
                         .frame(maxWidth: .infinity)
@@ -149,8 +155,9 @@ struct DayView: View {
                 .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
+                if !showPrompt {
                 List(viewModel.exercises.indices, id: \.self) { index in
-                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId, dayId: dayID)
+                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId, dayId: dayID, onMutation: onMutation)
                         .padding(.top)
                 }
                 .id(refreshKey) // Use the dynamic key here
@@ -159,12 +166,18 @@ struct DayView: View {
                     viewModel.sets = self.databaseManager.fetchSetByDayId(id: self.dayID)
                 })
                 .listStyle(PlainListStyle())
+            }
 
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
             if showPrompt {
                 AddExerciseView(show: $showPrompt, id: dayID)
             }
         }
+        .padding(.horizontal)
+        .background(showPrompt ? Color.gray.opacity(0.5) : Color.white)
+
     }
 }
 
@@ -191,40 +204,45 @@ struct ProgramView: View {
                         .fontWeight(.bold)
                 })
                 .buttonStyle(.borderedProminent)
-                List(viewModel.days.indices, id: \.self)
-                { index in
-                    NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
-                        .padding(.horizontal)
-                        .onTapGesture {
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
-                        })
-                    {
-                        HStack {
-                            Text(viewModel.days[index].dayName)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Image(systemName: "trash")
-                                .onTapGesture {
-                                    databaseManager.deleteDay(id: viewModel.days[index].dayId)
-                                    self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
-                                }
-                                .padding(5)
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(5)
+                if !showPrompt {
+                    List(viewModel.days.indices, id: \.self)
+                    { index in
+                        NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
+                            
+                            .onTapGesture {
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
+                            })
+                        {
+                            HStack {
+                                Text(viewModel.days[index].dayName)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Image(systemName: "trash")
+                                    .onTapGesture {
+                                        databaseManager.deleteDay(id: viewModel.days[index].dayId)
+                                        self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
+                                    }
+                                    .padding(5)
+                                    .background(Color.red)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(5)
+                            }
                         }
                     }
+                    
+                    .onAppear(perform: {
+                        viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
+                    })
+                    .listStyle(PlainListStyle())
                 }
-                .onAppear(perform: {
-                    viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
-                })
-                .listStyle(PlainListStyle())
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             
             if showPrompt {
                 AddDayView(show: $showPrompt, id: programsID)
             }
         }
+        .padding(.horizontal)
+        .background(showPrompt ? Color.gray.opacity(0.5) : Color.white)
     }
 }
 
@@ -247,38 +265,42 @@ struct ProgramListView: View {
                         .fontWeight(.bold)
                 })
                 .buttonStyle(.borderedProminent)
-                List(viewModel.programs.indices, id: \.self)
-                { index in
-                    NavigationLink(destination: ProgramView(name: viewModel.programs[index].name, programsID: viewModel.programs[index].id)
-                        .padding(.horizontal)
-                    )
-                    {
-                        HStack {
-                            Text(viewModel.programs[index].name)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Image(systemName: "trash")
-                                .onTapGesture {
-                                    databaseManager.deleteProgram(id: viewModel.programs[index].id)
-                                    self.viewModel.programs = self.databaseManager.fetchPrograms()
-                                }
-                                .padding(5)
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(5)
+                
+                if !showPrompt || false {
+                    List(viewModel.programs.indices, id: \.self)
+                    { index in
+                        NavigationLink(destination: ProgramView(name: viewModel.programs[index].name, programsID: viewModel.programs[index].id)
+                        )
+                        {
+                            HStack {
+                                Text(viewModel.programs[index].name)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Image(systemName: "trash")
+                                    .onTapGesture {
+                                        databaseManager.deleteProgram(id: viewModel.programs[index].id)
+                                        self.viewModel.programs = self.databaseManager.fetchPrograms()
+                                    }
+                                    .padding(5)
+                                    .background(Color.red)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(5)
+                            }
                         }
                     }
+                    .listStyle(PlainListStyle())
+                    .onAppear(perform: {
+                        self.viewModel.programs = self.databaseManager.fetchPrograms()
+                    })
                 }
-                .listStyle(PlainListStyle())
-                .onAppear(perform: {
-                    self.viewModel.programs = self.databaseManager.fetchPrograms()
-                })
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             
             if showPrompt {
                 AddProgramPrompt(show: $showPrompt)
             }
         }
+        .padding(.horizontal)
+        .background(showPrompt ? Color.gray.opacity(0.5) : Color.white)
     }
 }
 
@@ -332,9 +354,10 @@ struct ExerciseRowView: View {
     @EnvironmentObject private var databaseManager: DatabaseManager
     @State var name: String = ""
     @State var sets: [SetDetail] = []
-    @State var counter: Int = 1
+    @State var counter: Int = 0
     @State var id: Int64
     @State var dayId: Int64
+    var onMutation: (_ id: Int64) -> Void
     
     
     
@@ -349,8 +372,9 @@ struct ExerciseRowView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "trash")
                     .onTapGesture {
-                        databaseManager.deleteExercise(id: id)
-                        viewModel.exercises = databaseManager.fetchExercisesByDayId(id: dayId)
+                        onMutation(id)
+//                        databaseManager.deleteExercise(id: id)
+//                        viewModel.exercises = databaseManager.fetchExercisesByDayId(id: dayId)
                     }
                     .padding(5)
                     .background(Color.red)
@@ -380,13 +404,19 @@ struct ExerciseRowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(viewModel.sets.indices, id: \.self) { index in
                 if viewModel.sets[index].setExerciseId == id {
-                    ExerciseRowDetail(index: index, prevWeight: String(viewModel.sets[index].prevWeight), prevReps: String(viewModel.sets[index].prevReps), weight: String(viewModel.sets[index].setWeight), reps: String(viewModel.sets[index].setReps))
+                    ExerciseRowDetail(index: index, prevWeight: String(viewModel.sets[index].prevWeight), prevReps: String(viewModel.sets[index].prevReps), weight: String(viewModel.sets[index].setWeight), reps: String(viewModel.sets[index].setReps), setNum: String(viewModel.sets[index].setNum))
                 }
+            }
+            .onAppear() {
+                counter = viewModel.sets.filter({$0.setExerciseId == id}).count
             }
             
             
             Button(action: {
-                viewModel.sets.append(SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id))
+                viewModel.sets.append(SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id, setNum: counter + 1))
+                
+                databaseManager.addSet(setD: SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id, setNum: counter + 1))
+                counter = counter + 1
             }) {
                 Text("+")
                     .fontWeight(.bold)
@@ -405,20 +435,11 @@ struct ExerciseRowDetail: View {
     @State var prevReps: String
     @State var weight: String
     @State var reps: String
-    @State var strIndex: String
-    
-    init(index: Int, prevWeight: String, prevReps: String, weight: String, reps: String) {
-        self.index = index
-        self.prevWeight = prevWeight
-        self.prevReps = prevReps
-        self.weight = weight
-        self.reps = reps
-        self.strIndex = String(index + 1)
-    }
+    @State var setNum: String = "1"
     
     var body: some View {
         HStack {
-            TextField("", text: $strIndex)
+            TextField("", text: $setNum)
                 .fontWeight(.bold)
                 .frame(width: 30)
                 .multilineTextAlignment(.center)
