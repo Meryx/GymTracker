@@ -102,10 +102,11 @@ struct AddDayView: View {
 
 struct DayView: View {
     @EnvironmentObject private var databaseManager: DatabaseManager
-    @EnvironmentObject private var viewModel: ProgramListViewModel
+    @EnvironmentObject var viewModel: ProgramListViewModel
     @State var name: String
     @State var dayID: Int64
     @State var showPrompt: Bool = false
+    @State private var refreshKey = UUID()
     
     var body: some View {
         ZStack {
@@ -125,8 +126,18 @@ struct DayView: View {
                 Button(action: {
 
                         for setD in viewModel.sets {
+                            if(setD.setId != -1)
+                            {
+                                databaseManager.modifySet(setD: setD)
+                                continue
+                            }
                             databaseManager.addSet(setD: setD)
+                            
                         }
+                    
+                    viewModel.updateSets(databaseManager: databaseManager, dayID: dayID)
+                    refreshKey = UUID()
+ 
 
                 }, label: {
                     Text("Save Workout")
@@ -138,16 +149,17 @@ struct DayView: View {
                 .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
-                List(viewModel.exercises.indices, id: \.self)
-                { index in
+                List(viewModel.exercises.indices, id: \.self) { index in
                     ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId)
                         .padding(.top)
                 }
+                .id(refreshKey) // Use the dynamic key here
                 .onAppear(perform: {
                     viewModel.exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
                     viewModel.sets = self.databaseManager.fetchSetByDayId(id: self.dayID)
                 })
                 .listStyle(PlainListStyle())
+
             }
             if showPrompt {
                 AddExerciseView(show: $showPrompt, id: dayID)
@@ -292,11 +304,12 @@ struct AddProgramPrompt: View {
 }
 
 struct ExerciseRowView: View {
+    @EnvironmentObject private var viewModel: ProgramListViewModel
     @State var name: String = ""
     @State var sets: [SetDetail] = []
     @State var counter: Int = 1
     @State var id: Int64
-    @EnvironmentObject private var viewModel: ProgramListViewModel
+    
     
     
     
@@ -341,13 +354,13 @@ struct ExerciseRowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(viewModel.sets.indices, id: \.self) { index in
                 if viewModel.sets[index].setExerciseId == id {
-                    ExerciseRowDetail(index: index, prevWeight: "", prevReps: "", weight: String(viewModel.sets[index].setWeight), reps: "")
+                    ExerciseRowDetail(index: index, prevWeight: String(viewModel.sets[index].prevWeight), prevReps: String(viewModel.sets[index].prevReps), weight: String(viewModel.sets[index].setWeight), reps: String(viewModel.sets[index].setReps))
                 }
             }
             
             
             Button(action: {
-                viewModel.sets.append(SetDetail(setId: 0, setWeight: 0, setReps: 0, setExerciseId: id))
+                viewModel.sets.append(SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id))
             }) {
                 Text("+")
                     .fontWeight(.bold)
@@ -420,6 +433,9 @@ struct ExerciseRowDetail: View {
                 .background(.gray.opacity(0.5))
                 .cornerRadius(10)
                 .keyboardType(.decimalPad)
+                .onChange(of: reps, {
+                    viewModel.sets[index].setReps = Int64(reps) ?? 0
+                })
             //                .focused($nameIsFocused)
             
         }

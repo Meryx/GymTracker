@@ -62,6 +62,8 @@ class DatabaseManager: ObservableObject {
         let setID = Expression<Int64>("setID")
         let setWeight = Expression<Double>("setWeight")
         let setReps = Expression<Int64>("setReps")
+        let prevWeight = Expression<Double>("prevWeight")
+        let prevReps = Expression<Int64>("prevReps")
         let setExerciseID = Expression<Int64>("exercise_id")
 
         do {
@@ -86,6 +88,8 @@ class DatabaseManager: ObservableObject {
                 t.column(setID, primaryKey: .autoincrement)
                 t.column(setWeight)
                 t.column(setReps)
+                t.column(prevWeight)
+                t.column(prevReps)
                 t.column(setExerciseID, references: exercises, exerciseID)
             })
         } catch {
@@ -154,6 +158,8 @@ class DatabaseManager: ObservableObject {
         
         let setID = Expression<Int64>("setID")
         let setWeight = Expression<Double>("setWeight")
+        let prevWeight = Expression<Double>("prevWeight")
+        let prevReps = Expression<Int64>("prevReps")
         let setReps = Expression<Int64>("setReps")
         let setExerciseID = Expression<Int64>("exercise_id")
 
@@ -164,15 +170,17 @@ class DatabaseManager: ObservableObject {
                 .join(exercisesTable, on: setExerciseID == exercisesTable[exerciseID])
                 .join(daysTable, on: exerciseDayID == daysTable[dayID])
                 .filter(dayID == id)
-                .select(setsTable[setID], setsTable[setWeight], setsTable[setReps], setsTable[setExerciseID])
+                .select(setsTable[setID], setsTable[setWeight], setsTable[setReps], setsTable[setExerciseID], setsTable[prevWeight], setsTable[prevReps])
 
             for set in try db!.prepare(query) {
                 let setId = set[setID]
                 let weight = set[setWeight]
+                let pWeight = set[prevWeight]
+                let pReps = set[prevReps]
                 let reps = set[setReps]
                 let exerciseId = set[setExerciseID]
 
-                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, setExerciseId: exerciseId))
+                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, prevWeight: pWeight, prevReps: pReps, setExerciseId: exerciseId))
             }
         } catch {
             print("\(error)")
@@ -209,7 +217,6 @@ class DatabaseManager: ObservableObject {
             print("Unable to fetch workout days: \(error)")
         }
         
-        print(days)
 
         return days
     }
@@ -255,14 +262,43 @@ class DatabaseManager: ObservableObject {
         }
     }
     
+    func modifySet(setD: SetDetail) {
+        let sets = Table("sets")
+        let id = Expression<Int64>("setID") // Assuming 'id' is the primary key
+        let prevWeight = Expression<Double>("prevWeight")
+        let prevReps = Expression<Int64>("prevReps")
+        let setWeight = Expression<Double>("setWeight")
+        let setReps = Expression<Int64>("setReps")
+        let setExerciseId = Expression<Int64>("exercise_id")
+        
+        print(setD.setId)
+
+        do {
+            let setToUpdate = sets.filter(id == setD.setId)
+            let updateSet = setToUpdate.update(
+                prevWeight <- setD.setWeight,
+                prevReps <- setD.setReps,
+                setExerciseId <- setD.setExerciseId,
+                setWeight <- 0.0, // Set to a new value if needed
+                setReps <- 0 // Set to a new value if needed
+            )
+            try db?.run(updateSet)
+        } catch {
+            print("Update error: \(error)")
+        }
+    }
+
+    
     func addSet(setD: SetDetail) {
         let sets = Table("sets")
+        let prevWeight = Expression<Double>("prevWeight")
+        let prevReps = Expression<Int64>("prevReps")
         let setWeight = Expression<Double>("setWeight")
         let setReps = Expression<Int64>("setReps")
         let setExerciseId = Expression<Int64>("exercise_id")
         
         do {
-            let insertSet = sets.insert(setWeight <- Double(setD.setWeight), setReps <- setD.setReps, setExerciseId <- setD.setExerciseId)
+            let insertSet = sets.insert(prevWeight <- setD.setWeight, prevReps <- setD.setReps, setExerciseId <- setD.setExerciseId, setWeight <- 0.0, setReps <- 0)
             try db?.run(insertSet)
         } catch {
             print("\(error)")
@@ -322,6 +358,11 @@ class ProgramListViewModel: ObservableObject, Identifiable {
     @Published var days: [WorkoutDay] = []
     @Published var exercises: [Exercise] = []
     @Published var sets: [SetDetail] = []
+    
+    func updateSets(databaseManager: DatabaseManager, dayID: Int64) {
+            // Your logic to update sets
+            self.sets = databaseManager.fetchSetByDayId(id: dayID)
+        }
 }
 
 struct Program {
@@ -346,5 +387,7 @@ struct SetDetail {
     let setId: Int64
     var setWeight: Double
     var setReps: Int64
+    var prevWeight: Double
+    var prevReps: Int64
     let setExerciseId: Int64
 }
