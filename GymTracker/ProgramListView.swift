@@ -132,16 +132,39 @@ struct DayView: View {
                 Button(action: {
                     
                     for setD in viewModel.sets {
-                        if(setD.setId != -1)
-                        {
-                            databaseManager.modifySet(setD: setD)
-                            continue
-                        }
-                        databaseManager.addSet(setD: setD)
-                        
+                        databaseManager.modifySet(setD: setD)
                     }
                     
                     viewModel.updateSets(databaseManager: databaseManager, dayID: dayID)
+                    
+                    let name = name
+                    let date = Date()
+                    let toAdd = ExerciseHistory(historyId: 0, dayName: name, date: date)
+                    var historyId: Int64
+                    do {
+                        historyId = try databaseManager.addExerciseHistory(toAdd)
+                        for e in viewModel.exercises {
+                            let id = e.exerciseId
+                            let sets = databaseManager.fetchSetByExerciseId(id: id)
+                            let count = sets.count
+                            let setToAdd = SetHistory(setHistoryId: 0, setExerciseHistoryId: historyId, name: e.exerciseName, count: Int64(count))
+                            do {
+                                try databaseManager.addSetHistory(setToAdd)
+                                
+                            } catch {
+                                print("\(error)")
+                            }
+                        }
+                    } catch {
+                        print("\(error)")
+                    }
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     refreshKey = UUID()
                     
                     
@@ -156,28 +179,28 @@ struct DayView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 if !showPrompt {
-                List(viewModel.exercises.indices, id: \.self) { index in
-                    ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId, dayId: dayID, onMutation: onMutation)
-                        .padding(.top)
+                    List(viewModel.exercises.indices, id: \.self) { index in
+                        ExerciseRowView(name: viewModel.exercises[index].exerciseName, id: viewModel.exercises[index].exerciseId, dayId: dayID, onMutation: onMutation)
+                            .padding(.top)
+                    }
+                    .id(refreshKey) // Use the dynamic key here
+                    .onAppear(perform: {
+                        viewModel.exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
+                        viewModel.sets = self.databaseManager.fetchSetByDayId(id: self.dayID)
+                    })
+                    .listStyle(PlainListStyle())
                 }
-                .id(refreshKey) // Use the dynamic key here
-                .onAppear(perform: {
-                    viewModel.exercises = self.databaseManager.fetchExercisesByDayId(id: self.dayID)
-                    viewModel.sets = self.databaseManager.fetchSetByDayId(id: self.dayID)
-                })
-                .listStyle(PlainListStyle())
-            }
-
+                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
+            
             if showPrompt {
                 AddExerciseView(show: $showPrompt, id: dayID)
             }
         }
         .padding(.horizontal)
         .background(showPrompt ? Color.gray.opacity(0.5) : Color.white)
-
+        
     }
 }
 
@@ -208,7 +231,7 @@ struct ProgramView: View {
                     List(viewModel.days.indices, id: \.self)
                     { index in
                         NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
-                            
+                                       
                             .onTapGesture {
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
                             })
@@ -373,8 +396,6 @@ struct ExerciseRowView: View {
                 Image(systemName: "trash")
                     .onTapGesture {
                         onMutation(id)
-//                        databaseManager.deleteExercise(id: id)
-//                        viewModel.exercises = databaseManager.fetchExercisesByDayId(id: dayId)
                     }
                     .padding(5)
                     .background(Color.red)
@@ -416,6 +437,7 @@ struct ExerciseRowView: View {
                 viewModel.sets.append(SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id, setNum: counter + 1))
                 
                 databaseManager.addSet(setD: SetDetail(setId: -1, setWeight: 0, setReps: 0, prevWeight: 0, prevReps: 0, setExerciseId: id, setNum: counter + 1))
+                viewModel.sets = databaseManager.fetchSetByDayId(id: dayId)
                 counter = counter + 1
             }) {
                 Text("+")
@@ -483,12 +505,7 @@ struct ExerciseRowDetail: View {
                 .onChange(of: reps, {
                     viewModel.sets[index].setReps = Int64(reps) ?? 0
                 })
-            //                .focused($nameIsFocused)
             
         }
     }
 }
-
-//#Preview {
-//    ProgramListView()
-//}
