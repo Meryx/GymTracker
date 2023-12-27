@@ -469,21 +469,33 @@ struct ExerciseRowDetail: View {
                 .cornerRadius(10)
                 .disabled(true)
             
-            TextField("", text: $prevWeight)
-                .fontWeight(.bold)
-                .frame(width: 90)
-                .multilineTextAlignment(.center)
-                .background(.gray.opacity(0.5))
-                .cornerRadius(10)
-                .disabled(true)
+            if(prevWeight != "0.0"){
+                TextField("", text: $prevWeight)
+                    .fontWeight(.bold)
+                    .frame(width: 90)
+                    .multilineTextAlignment(.center)
+                    .background(.gray.opacity(0.5))
+                    .cornerRadius(10)
+                    .disabled(true)
+            } else {
+                Text("-")
+                    .fontWeight(.bold)
+                    .frame(width: 90, alignment: .center)
+            }
             
-            TextField("", text: $prevReps)
-                .fontWeight(.bold)
-                .frame(width: 90)
-                .multilineTextAlignment(.center)
-                .background(.gray.opacity(0.5))
-                .cornerRadius(10)
-                .disabled(true)
+            if(prevReps != "0"){
+                TextField("", text: $prevReps)
+                    .fontWeight(.bold)
+                    .frame(width: 90)
+                    .multilineTextAlignment(.center)
+                    .background(.gray.opacity(0.5))
+                    .cornerRadius(10)
+                    .disabled(true)
+            } else {
+                Text("-")
+                    .fontWeight(.bold)
+                    .frame(width: 90, alignment: .center)
+            }
             
             TextField("", text: $weight)
                 .fontWeight(.bold)

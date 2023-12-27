@@ -13,7 +13,6 @@ struct WorkoutHistoryView: View {
     var body: some View {
         VStack{
             ForEach(viewModel.history.indices, id: \.self) {index in
-                Text(String(viewModel.history[viewModel.history.endIndex - 1 - index].historyId))
                 WorkoutHistoryPaneView(history: viewModel.history[viewModel.history.endIndex - 1 - index], ind: index)
                 
             }
@@ -22,10 +21,12 @@ struct WorkoutHistoryView: View {
         .onAppear() {
             viewModel.setHistory = []
             viewModel.history = databaseManager.fetchAllExerciseHistory()
-            for i in 0...viewModel.history.count - 1 {
-                let his = viewModel.history[viewModel.history.endIndex - 1 - i]
-                viewModel.setHistory.append(databaseManager.fetchAllSetHistories(historyId: his.historyId))
-                
+            if viewModel.history.count > 0 {
+                for i in 0...viewModel.history.count - 1 {
+                    let his = viewModel.history[viewModel.history.endIndex - 1 - i]
+                    viewModel.setHistory.append(databaseManager.fetchAllSetHistories(historyId: his.historyId))
+                    
+                }
             }
         }
     }
