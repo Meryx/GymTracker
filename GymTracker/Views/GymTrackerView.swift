@@ -12,12 +12,18 @@ struct WorkoutHistoryView: View {
     @EnvironmentObject var databaseManager: DatabaseManager
     var body: some View {
         VStack{
+            Text("History")
+                .font(.title)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
             ForEach(viewModel.history.indices, id: \.self) {index in
                 WorkoutHistoryPaneView(history: viewModel.history[viewModel.history.endIndex - 1 - index], ind: index)
                 
             }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal)
         .onAppear() {
             viewModel.setHistory = []
             viewModel.history = databaseManager.fetchAllExerciseHistory()

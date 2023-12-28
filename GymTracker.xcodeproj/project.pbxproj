@@ -121,7 +121,6 @@
 				E4126D722B126BDB0046F233 /* GymTracker.xcdatamodeld */,
 				E4126D6D2B126BDB0046F233 /* Preview Content */,
 				E47301892B344261004CFBE9 /* DatabaseManager.swift */,
-				E473018B2B344499004CFBE9 /* GymTrackerView.swift */,
 			);
 			path = GymTracker;
 			sourceTree = "<group>";
@@ -154,6 +153,7 @@
 		E47301752B3032E3004CFBE9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E473018B2B344499004CFBE9 /* GymTrackerView.swift */,
 				E47301842B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift */,
 				E473018D2B344CDC004CFBE9 /* ProgramListView.swift */,
 				E4234E102B3D301800EB2542 /* ProgramView.swift */,
