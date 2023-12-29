@@ -37,7 +37,7 @@ struct WorkoutHistoryPaneView: View {
                 Text("\(viewModel.setHistory[ind][index].count)x \(viewModel.setHistory[ind][index].name)")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding([.leading], 5)
-                    .padding(.bottom, index == viewModel.setHistory.endIndex - 1 ? 5 : 0)
+                    .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
             }
 
 

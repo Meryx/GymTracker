@@ -43,12 +43,11 @@ struct GymTrackerView: View {
     var body: some View {
         TabView
         {
-            VStack {
+
                 NavigationStack {
                     ProgramListView()
                 }
-            }
-            .frame(maxHeight: .infinity, alignment: .topLeading)
+            
             .tabItem {
                 Label("Home", systemImage: "house")
             }

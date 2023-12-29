@@ -12,6 +12,7 @@ struct AddProgramPrompt: View {
     @EnvironmentObject var viewModel: ProgramListViewModel
     @State var name: String = ""
     @Binding var show: Bool
+    @State var myVar = ""
     
     var body: some View {
         VStack {
@@ -55,9 +56,11 @@ struct ProgramListView: View {
     @EnvironmentObject private var databaseManager: DatabaseManager
     @EnvironmentObject private var viewModel: ProgramListViewModel
     @State var showPrompt: Bool = false
-
+    
     var body: some View {
+        
         ZStack {
+            
             VStack {
                 Text("Program List")
                     .font(.title)
@@ -70,25 +73,30 @@ struct ProgramListView: View {
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)
                 })
+                .padding(.top)
                 .buttonStyle(.borderedProminent)
                 
                 if !showPrompt {
                     List(self.viewModel.programs.indices, id: \.self)
                     { index in
-                        NavigationLink(destination: ProgramView(name: self.viewModel.programs[index].name, programsID: self.viewModel.programs[index].id))
-                        {
+                        ZStack {
+                            NavigationLink(destination: ProgramView(name: self.viewModel.programs[index].name, programsID: self.viewModel.programs[index].id))
+                            {
+                                EmptyView()
+                            }.opacity(0.0)
+                            
                             HStack {
                                 Text(self.viewModel.programs[index].name)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                Image(systemName: "trash")
-                                    .onTapGesture {
-                                        self.databaseManager.deleteProgram(id: self.viewModel.programs[index].id)
-                                        self.viewModel.programs = self.databaseManager.fetchPrograms()
-                                    }
-                                    .padding(5)
-                                    .background(Color.red)
-                                    .foregroundColor(Color.white)
-                                    .cornerRadius(5)
+                            }
+                            
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    self.databaseManager.deleteProgram(id: self.viewModel.programs[index].id)
+                                    self.viewModel.programs = self.databaseManager.fetchPrograms()
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
@@ -96,6 +104,7 @@ struct ProgramListView: View {
                     .onAppear(perform: {
                         self.viewModel.programs = self.databaseManager.fetchPrograms()
                     })
+                    
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -105,6 +114,7 @@ struct ProgramListView: View {
             }
         }
         .padding(.horizontal)
+        .padding(.top, 38)
         .background(showPrompt ? Color.gray.opacity(0.5) : Color.white)
     }
 }

@@ -9,12 +9,35 @@ import SwiftUI
 
 struct ExerciseRowDetail: View {
     @EnvironmentObject private var viewModel: ProgramListViewModel
+    @EnvironmentObject private var databaseManager: DatabaseManager
     @State var index: Int
     @State var prevWeight: String
     @State var prevReps: String
     @State var weight: String
     @State var reps: String
     @State var setNum: String = "1"
+    
+    private var bindingForWeight: Binding<String> {
+            Binding(
+                get: {
+                    weight == "0.0" ? "" : weight
+                },
+                set: {
+                    weight = $0.isEmpty ? "0.0" : $0
+                }
+            )
+        }
+    
+    private var bindingForReps: Binding<String> {
+            Binding(
+                get: {
+                    reps == "0" ? "" : reps
+                },
+                set: {
+                    reps = $0.isEmpty ? "0" : $0
+                }
+            )
+        }
     
     var body: some View {
         HStack {
@@ -27,13 +50,9 @@ struct ExerciseRowDetail: View {
                 .disabled(true)
             
             if(prevWeight != "0.0"){
-                TextField("", text: $prevWeight)
+                Text(prevWeight)
                     .fontWeight(.bold)
-                    .frame(width: 90)
-                    .multilineTextAlignment(.center)
-                    .background(.gray.opacity(0.5))
-                    .cornerRadius(10)
-                    .disabled(true)
+                    .frame(width: 90, alignment: .center)
             } else {
                 Text("-")
                     .fontWeight(.bold)
@@ -41,30 +60,29 @@ struct ExerciseRowDetail: View {
             }
             
             if(prevReps != "0"){
-                TextField("", text: $prevReps)
+                Text(prevReps)
                     .fontWeight(.bold)
-                    .frame(width: 90)
-                    .multilineTextAlignment(.center)
-                    .background(.gray.opacity(0.5))
-                    .cornerRadius(10)
-                    .disabled(true)
+                    .frame(width: 90, alignment: .center)
             } else {
                 Text("-")
                     .fontWeight(.bold)
                     .frame(width: 90, alignment: .center)
             }
             
-            TextField("", text: $weight)
-                .fontWeight(.bold)
-                .frame(width: 50)
-                .multilineTextAlignment(.center)
-                .background(.gray.opacity(0.5))
-                .cornerRadius(10)
-                .keyboardType(.decimalPad)
-                .onChange(of: weight, {
-                    viewModel.sets[index].setWeight = Double(weight) ?? 0.0
-                })
-            TextField("", text: $reps)
+
+                TextField("", text: bindingForWeight)
+                    .fontWeight(.bold)
+                    .frame(width: 50)
+                    .multilineTextAlignment(.center)
+                    .background(.gray.opacity(0.5))
+                    .cornerRadius(10)
+                    .keyboardType(.decimalPad)
+                    .onChange(of: weight, {
+                        viewModel.sets[index].setWeight = Double(weight) ?? 0.0
+                        databaseManager.modifySetAlt(setD: viewModel.sets[index])
+                    })
+
+            TextField("", text: bindingForReps)
                 .fontWeight(.bold)
                 .frame(width: 50)
                 .multilineTextAlignment(.center)
@@ -73,6 +91,7 @@ struct ExerciseRowDetail: View {
                 .keyboardType(.decimalPad)
                 .onChange(of: reps, {
                     viewModel.sets[index].setReps = Int64(reps) ?? 0
+                    databaseManager.modifySetAlt(setD: viewModel.sets[index])
                 })
             
         }
@@ -136,6 +155,7 @@ struct ExerciseRowView: View {
                 }
             }
             .onAppear() {
+                print(viewModel.sets)
                 counter = viewModel.sets.filter({$0.setExerciseId == id}).count
             }
             

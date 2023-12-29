@@ -485,6 +485,30 @@ class DatabaseManager: ObservableObject {
         }
     }
     
+    func modifySetAlt(setD: SetDetail) {
+        let sets = Table("sets")
+        let id = Expression<Int64>("setID") // Assuming 'id' is the primary key
+        let prevWeight = Expression<Double>("prevWeight")
+        let prevReps = Expression<Int64>("prevReps")
+        let setWeight = Expression<Double>("setWeight")
+        let setReps = Expression<Int64>("setReps")
+        let setExerciseId = Expression<Int64>("exercise_id")
+        
+        do {
+            let setToUpdate = sets.filter(id == setD.setId)
+            let updateSet = setToUpdate.update(
+                prevWeight <- setD.prevWeight,
+                prevReps <- setD.prevReps,
+                setExerciseId <- setD.setExerciseId,
+                setWeight <- setD.setWeight, // Set to a new value if needed
+                setReps <- setD.setReps // Set to a new value if needed
+            )
+            try db?.run(updateSet)
+        } catch {
+            print("Update error: \(error)")
+        }
+    }
+    
     func modifySet(setD: SetDetail) {
         let sets = Table("sets")
         let id = Expression<Int64>("setID") // Assuming 'id' is the primary key
