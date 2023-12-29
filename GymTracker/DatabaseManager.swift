@@ -97,6 +97,21 @@ class DatabaseManager: ObservableObject {
         let count = Expression<Int64>("count")
         
         do {
+                // Check if the 'programs' table already exists
+                if try db?.scalar(programs.exists) ?? false {
+                    // If the table exists, just return without creating any tables
+                    return
+                }
+
+                // If the 'programs' table doesn't exist, continue to create all the tables
+                // Here goes the rest of your table creation code...
+                // ...
+
+            } catch {
+                print("Unable to check or create tables: \(error)")
+            }
+        
+        do {
             try db?.run(programs.create { t in
                 t.column(programsID, primaryKey: .autoincrement)
                 t.column(programsName)

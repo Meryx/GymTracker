@@ -22,7 +22,7 @@
 		E47301882B344123004CFBE9 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = E47301872B344123004CFBE9 /* SQLite */; };
 		E473018C2B344499004CFBE9 /* GymTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473018B2B344499004CFBE9 /* GymTrackerView.swift */; };
 		E473018E2B344CDC004CFBE9 /* ProgramListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473018D2B344CDC004CFBE9 /* ProgramListView.swift */; };
-		E4919CBE2B3EFF69009730D1 /* DayView2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4919CBD2B3EFF69009730D1 /* DayView2.swift */; };
+		E4919CBE2B3EFF69009730D1 /* DayPaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4919CBD2B3EFF69009730D1 /* DayPaneView.swift */; };
 		E4919CC02B3F07DF009730D1 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47301892B344261004CFBE9 /* DatabaseManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -62,7 +62,7 @@
 		E47301892B344261004CFBE9 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		E473018B2B344499004CFBE9 /* GymTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTrackerView.swift; sourceTree = "<group>"; };
 		E473018D2B344CDC004CFBE9 /* ProgramListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramListView.swift; sourceTree = "<group>"; };
-		E4919CBD2B3EFF69009730D1 /* DayView2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayView2.swift; sourceTree = "<group>"; };
+		E4919CBD2B3EFF69009730D1 /* DayPaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayPaneView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,7 +161,7 @@
 				E4234E102B3D301800EB2542 /* ProgramView.swift */,
 				E4234E122B3D30BE00EB2542 /* DayView.swift */,
 				E4234E142B3D314500EB2542 /* ExerciseRowView.swift */,
-				E4919CBD2B3EFF69009730D1 /* DayView2.swift */,
+				E4919CBD2B3EFF69009730D1 /* DayPaneView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -323,7 +323,7 @@
 				E473018C2B344499004CFBE9 /* GymTrackerView.swift in Sources */,
 				E4234E132B3D30BE00EB2542 /* DayView.swift in Sources */,
 				E47301852B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift in Sources */,
-				E4919CBE2B3EFF69009730D1 /* DayView2.swift in Sources */,
+				E4919CBE2B3EFF69009730D1 /* DayPaneView.swift in Sources */,
 				E4234E152B3D314500EB2542 /* ExerciseRowView.swift in Sources */,
 				E4126D682B126BDA0046F233 /* GymTrackerApp.swift in Sources */,
 				E4234E112B3D301800EB2542 /* ProgramView.swift in Sources */,

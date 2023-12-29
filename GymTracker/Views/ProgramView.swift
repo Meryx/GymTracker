@@ -62,6 +62,10 @@ struct ProgramView: View {
     
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
+    func deleteMutation() {
+        viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
+    }
+    
     
     var body: some View {
         ZStack {
@@ -70,44 +74,30 @@ struct ProgramView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Button(action: {
-                    showPrompt = true
-                }, label: {
-                    Text("+ New Day")
-                        .frame(maxWidth: .infinity)
-                        .fontWeight(.bold)
-                })
-                .buttonStyle(.borderedProminent)
+                
                 if !showPrompt {
-                    //                    List(viewModel.days.indices, id: \.self)
-                    //                    { index in
-//                                            NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
-//                    
-//                                                .onTapGesture {
-//                                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-//                                                })
-                    //                        {
-                    //                            HStack {
-                    //                                Text(viewModel.days[index].dayName)
-                    //                                    .frame(maxWidth: .infinity, alignment: .leading)
-                    //                                Image(systemName: "trash")
-                    //                                    .onTapGesture {
-                    //                                        databaseManager.deleteDay(id: viewModel.days[index].dayId)
-                    //                                        self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
-                    //                                    }
-                    //                                    .padding(5)
-                    //                                    .background(Color.red)
-                    //                                    .foregroundColor(.white)
-                    //                                    .cornerRadius(5)
-                    //                            }
-                    //                        }
-                    //                    }
-                    //
-                    //                    .onAppear(perform: {
-                    //                        viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
-                    //                    })
-                    //                    .listStyle(PlainListStyle())
+                    Button(action: {
+                        showPrompt = true
+                    }, label: {
+                        Text("Tap to Add New Day")
+                            .fontWeight(.bold)
+                            .padding()
+                            .frame(width: UIScreen.main.bounds.width * 0.45, height: UIScreen.main.bounds.width * 0.45, alignment: .center)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10) // Set the corner radius
+                                    .strokeBorder(Color.gray.opacity(0.5), lineWidth: 1))
+                        
+                    })
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     
+                }
+                if !showPrompt {
+
+                    Text("Exercise Days")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fontWeight(.bold)
+                        .padding(.top)
+                        
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 10) {
                             ForEach(viewModel.days.indices, id: \.self)
@@ -118,7 +108,7 @@ struct ProgramView: View {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     })
                                 {
-                                    DayPane(name: viewModel.days[index].dayName, dayId: viewModel.days[index].dayId)
+                                    DayPane(name: viewModel.days[index].dayName, dayId: viewModel.days[index].dayId, onMutation: deleteMutation)
                                         .foregroundColor(.black)
                                 }
                             }

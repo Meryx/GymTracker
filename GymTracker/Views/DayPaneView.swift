@@ -36,11 +36,26 @@ struct DayPane: View {
     @State var name = "Hello"
     @State var dayId: Int64
     @State var exercises: [Exercise] = []
+    
+    var onMutation: () -> Void
     var body: some View {
         VStack {
-            Text(name)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fontWeight(.bold)
+            HStack {
+                Text(name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fontWeight(.bold)
+                Menu {
+                    Button("Delete", action: {
+                        databaseManager.deleteDay(id: dayId)
+                        onMutation()
+                    })
+                                    } label: {
+                                        Image(systemName: "ellipsis")
+                                    }
+                                    .simultaneousGesture(TapGesture().onEnded {
+                                                                // Do nothing here, just prevent propagation
+                                                            })
+            }
             DescriptionView(viewModel: ExerciseViewModel(exercises: exercises))
                 .onAppear() {
                     exercises = databaseManager.fetchExercisesByDayId(id: dayId)
