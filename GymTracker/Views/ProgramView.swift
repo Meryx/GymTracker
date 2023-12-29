@@ -60,6 +60,8 @@ struct ProgramView: View {
     @State var programsID: Int64
     @State var showPrompt: Bool = false
     
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    
     
     var body: some View {
         ZStack {
@@ -77,34 +79,54 @@ struct ProgramView: View {
                 })
                 .buttonStyle(.borderedProminent)
                 if !showPrompt {
-                    List(viewModel.days.indices, id: \.self)
-                    { index in
-                        NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
-                                       
-                            .onTapGesture {
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            })
-                        {
-                            HStack {
-                                Text(viewModel.days[index].dayName)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                Image(systemName: "trash")
+                    //                    List(viewModel.days.indices, id: \.self)
+                    //                    { index in
+//                                            NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
+//                    
+//                                                .onTapGesture {
+//                                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+//                                                })
+                    //                        {
+                    //                            HStack {
+                    //                                Text(viewModel.days[index].dayName)
+                    //                                    .frame(maxWidth: .infinity, alignment: .leading)
+                    //                                Image(systemName: "trash")
+                    //                                    .onTapGesture {
+                    //                                        databaseManager.deleteDay(id: viewModel.days[index].dayId)
+                    //                                        self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
+                    //                                    }
+                    //                                    .padding(5)
+                    //                                    .background(Color.red)
+                    //                                    .foregroundColor(.white)
+                    //                                    .cornerRadius(5)
+                    //                            }
+                    //                        }
+                    //                    }
+                    //
+                    //                    .onAppear(perform: {
+                    //                        viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
+                    //                    })
+                    //                    .listStyle(PlainListStyle())
+                    
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(viewModel.days.indices, id: \.self)
+                            { index in
+                                NavigationLink(destination: DayView(name: viewModel.days[index].dayName, dayID: viewModel.days[index].dayId)
+        
                                     .onTapGesture {
-                                        databaseManager.deleteDay(id: viewModel.days[index].dayId)
-                                        self.viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: programsID)
-                                    }
-                                    .padding(5)
-                                    .background(Color.red)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(5)
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                    })
+                                {
+                                    DayPane(name: viewModel.days[index].dayName, dayId: viewModel.days[index].dayId)
+                                        .foregroundColor(.black)
+                                }
                             }
                         }
                     }
-                    
                     .onAppear(perform: {
                         viewModel.days = self.databaseManager.fetchWorkoutDaysByProgramId(id: self.programsID)
                     })
-                    .listStyle(PlainListStyle())
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
