@@ -155,7 +155,6 @@ struct ExerciseRowView: View {
                 }
             }
             .onAppear() {
-                print(viewModel.sets)
                 counter = viewModel.sets.filter({$0.setExerciseId == id}).count
             }
             

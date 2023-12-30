@@ -23,16 +23,16 @@ class DatabaseManager: ObservableObject {
         
         let databaseFilePath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)/db.sqlite3"
         
-//                let fileManager = FileManager.default
-//        
-//                        if fileManager.fileExists(atPath: databaseFilePath) {
-//                            do {
-//                                try fileManager.removeItem(atPath: databaseFilePath)
-//                                print("Existing database deleted.")
-//                            } catch {
-//                                print("Error deleting database: \(error)")
-//                            }
-//                        }
+        let fileManager = FileManager.default
+        
+        //        if fileManager.fileExists(atPath: databaseFilePath) {
+        //            do {
+        //                try fileManager.removeItem(atPath: databaseFilePath)
+        //                print("Existing database deleted.")
+        //            } catch {
+        //                print("Error deleting database: \(error)")
+        //            }
+        //        }
         
         
         do {
@@ -95,21 +95,23 @@ class DatabaseManager: ObservableObject {
         let setExerciseHistoryId = Expression<Int64>("setExerciseHistoryId")
         let name = Expression<String>("name")
         let count = Expression<Int64>("count")
+        let topKg = Expression<Double>("topKg")
+        let topReps = Expression<Int64>("topReps")
         
         do {
-                // Check if the 'programs' table already exists
-                if try db?.scalar(programs.exists) ?? false {
-                    // If the table exists, just return without creating any tables
-                    return
-                }
-
-                // If the 'programs' table doesn't exist, continue to create all the tables
-                // Here goes the rest of your table creation code...
-                // ...
-
-            } catch {
-                print("Unable to check or create tables: \(error)")
+            // Check if the 'programs' table already exists
+            if try db?.scalar(programs.exists) ?? false {
+                // If the table exists, just return without creating any tables
+                return
             }
+            
+            // If the 'programs' table doesn't exist, continue to create all the tables
+            // Here goes the rest of your table creation code...
+            // ...
+            
+        } catch {
+            print("Unable to check or create tables: \(error)")
+        }
         
         do {
             try db?.run(programs.create { t in
@@ -154,6 +156,8 @@ class DatabaseManager: ObservableObject {
                 t.column(setExerciseHistoryId)
                 t.column(name)
                 t.column(count)
+                t.column(topKg)
+                t.column(topReps)
                 t.foreignKey(setExerciseHistoryId, references: exerciseHistory, historyId)
             })
         } catch {
@@ -163,14 +167,16 @@ class DatabaseManager: ObservableObject {
     
     func fetchAllSetHistories(historyId: Int64) -> [SetHistory] {
         let setHistoryTable = Table("SetHistory")
-
+        
         let setHistoryId = Expression<Int64>("setHistoryId")
         let setExerciseHistoryId = Expression<Int64>("setExerciseHistoryId")
         let name = Expression<String>("name")
         let count = Expression<Int64>("count")
-
+        let topKg = Expression<Double>("topKg")
+        let topReps = Expression<Int64>("topReps")
+        
         var setHistories: [SetHistory] = []
-
+        
         do {
             let query = setHistoryTable.filter(setExerciseHistoryId == historyId)
             for setHistory in try db!.prepare(query) {
@@ -178,20 +184,24 @@ class DatabaseManager: ObservableObject {
                 let exerciseHistoryId = setHistory[setExerciseHistoryId]
                 let setName = setHistory[name]
                 let setCount = setHistory[count]
-
+                let topkg = setHistory[topKg]
+                let topr = setHistory[topReps]
+                
                 let setHistoryInstance = SetHistory(setHistoryId: id,
                                                     setExerciseHistoryId: exerciseHistoryId,
                                                     name: setName,
-                                                    count: setCount)
+                                                    count: setCount,
+                                                    topKg: topkg,
+                                                    topReps: topr)
                 setHistories.append(setHistoryInstance)
             }
         } catch {
             print("Fetch error: \(error)")
         }
-
+        
         return setHistories
     }
-
+    
     
     func addExerciseHistory(_ exerciseHistory: ExerciseHistory) throws -> Int64 {
         let exerciseHistoryTable = Table("ExerciseHistory")
@@ -210,7 +220,7 @@ class DatabaseManager: ObservableObject {
         }
         
     }
-
+    
     func addSetHistory(_ setHistory: SetHistory) throws {
         
         
@@ -218,11 +228,15 @@ class DatabaseManager: ObservableObject {
         let setExerciseHistoryId = Expression<Int64>("setExerciseHistoryId")
         let setName = Expression<String>("name")
         let setCount = Expression<Int64>("count")
+        let topKg = Expression<Double>("topKg")
+        let topReps = Expression<Int64>("topReps")
         let setHistoryTable = Table("SetHistory")
         let insert = setHistoryTable.insert(
             setExerciseHistoryId <- setHistory.setExerciseHistoryId,
             setName <- setHistory.name,
-            setCount <- setHistory.count
+            setCount <- setHistory.count,
+            topKg <- setHistory.topKg,
+            topReps <- setHistory.topReps
         )
         try db?.run(insert)
     }
@@ -317,12 +331,12 @@ class DatabaseManager: ObservableObject {
         let setNum = Expression<Int64>("setNum")
         
         var setDetails: [SetDetail] = []
-
+        
         do {
             let query = setsTable
                 .filter(setExerciseID == id)
                 .select(setID, setWeight, setReps, setExerciseID, prevWeight, prevReps, setNum)
-
+            
             for set in try db!.prepare(query) {
                 let setId = set[setID]
                 let weight = set[setWeight]
@@ -331,16 +345,20 @@ class DatabaseManager: ObservableObject {
                 let reps = set[setReps]
                 let exerciseId = set[setExerciseID]
                 let setN = set[setNum]
-
-                setDetails.append(SetDetail(setId: setId, setWeight: weight, setReps: reps, prevWeight: pWeight, prevReps: pReps, setExerciseId: exerciseId, setNum: Int(setN)))
+                
+                
+                
+                let toAdd = SetDetail(setId: setId, setWeight: weight, setReps: reps, prevWeight: pWeight, prevReps: pReps, setExerciseId: exerciseId, setNum: Int(setN))
+                
+                setDetails.append(toAdd)
             }
         } catch {
             print("\(error)")
         }
-
+        
         return setDetails
     }
-
+    
     
     func fetchSetByDayId(id: Int64) -> [SetDetail] {
         let daysTable = Table("days")
@@ -509,6 +527,7 @@ class DatabaseManager: ObservableObject {
         let setReps = Expression<Int64>("setReps")
         let setExerciseId = Expression<Int64>("exercise_id")
         
+        
         do {
             let setToUpdate = sets.filter(id == setD.setId)
             let updateSet = setToUpdate.update(
@@ -568,29 +587,29 @@ class DatabaseManager: ObservableObject {
     
     func fetchAllExerciseHistory() -> [ExerciseHistory] {
         let exerciseHistoryTable = Table("ExerciseHistory")
-
+        
         let historyId = Expression<Int64>("historyId")
         let dayName = Expression<String>("dayName")
         let date = Expression<Date>("date")
-
+        
         var exerciseHistories: [ExerciseHistory] = []
-
+        
         do {
             for exercise in try db!.prepare(exerciseHistoryTable) {
                 let id = exercise[historyId]
                 let name = exercise[dayName]
                 let dateValue = exercise[date]
-
+                
                 let exerciseHistory = ExerciseHistory(historyId: id, dayName: name, date: dateValue)
                 exerciseHistories.append(exerciseHistory)
             }
         } catch {
             print("Fetch error: \(error)")
         }
-
+        
         return exerciseHistories
     }
-
+    
     
     
     func addProgramIfTableEmpty(name: String) {
@@ -683,6 +702,8 @@ struct SetHistory {
     let setExerciseHistoryId: Int64
     let name: String
     let count: Int64
+    var topKg: Double = 0.0
+    var topReps: Int64 = 0
 }
 
 struct SetDetail {

@@ -44,6 +44,7 @@ struct DayPane: View {
                 Text(name)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fontWeight(.bold)
+                    .multilineTextAlignment(.leading)
                 Menu {
                     Button("Delete", action: {
                         databaseManager.deleteDay(id: dayId)

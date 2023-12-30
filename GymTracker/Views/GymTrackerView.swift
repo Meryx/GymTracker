@@ -17,9 +17,11 @@ struct WorkoutHistoryView: View {
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            ForEach(viewModel.history.indices, id: \.self) {index in
-                WorkoutHistoryPaneView(history: viewModel.history[viewModel.history.endIndex - 1 - index], ind: index)
-                
+            ScrollView {
+                ForEach(viewModel.history.indices, id: \.self) {index in
+                    WorkoutHistoryPaneView(history: viewModel.history[viewModel.history.endIndex - 1 - index], ind: index)
+                    
+                }
             }
         }
         .frame(maxHeight: .infinity, alignment: .topLeading)

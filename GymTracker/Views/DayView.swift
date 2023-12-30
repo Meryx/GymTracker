@@ -69,6 +69,21 @@ struct DayView: View {
         refreshKey = UUID()
     }
     
+    func getTopSet(setDs: [SetDetail]) -> (Double, Int64) {
+        var max = 0.0;
+        var rValue: (Double, Int64) = (0,0)
+        
+        
+        for s in setDs {
+            if Double(s.prevReps) * s.prevWeight > max
+            {
+                max = Double(s.prevReps) * s.prevWeight
+                rValue = (s.prevWeight, s.prevReps)
+            }
+        }
+        return rValue
+    }
+    
     var body: some View {
         ZStack {
             VStack {
@@ -101,8 +116,9 @@ struct DayView: View {
                         for e in viewModel.exercises {
                             let id = e.exerciseId
                             let sets = databaseManager.fetchSetByExerciseId(id: id)
+                            let topSet = getTopSet(setDs: sets)
                             let count = sets.count
-                            let setToAdd = SetHistory(setHistoryId: 0, setExerciseHistoryId: historyId, name: e.exerciseName, count: Int64(count))
+                            let setToAdd = SetHistory(setHistoryId: 0, setExerciseHistoryId: historyId, name: e.exerciseName, count: Int64(count), topKg: topSet.0, topReps: topSet.1)
                             do {
                                 try databaseManager.addSetHistory(setToAdd)
                                 

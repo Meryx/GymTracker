@@ -29,15 +29,28 @@ struct WorkoutHistoryPaneView: View {
                 .padding([.leading], 5)
 
 
-            Text("Exercise")
-                .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.bottom, .leading], 5)
-            ForEach(viewModel.setHistory[ind].indices, id: \.self) { index in
-                Text("\(viewModel.setHistory[ind][index].count)x \(viewModel.setHistory[ind][index].name)")
+            HStack {
+                Text("Exercise")
+                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding([.leading], 5)
-                    .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+                    .padding([.bottom, .leading], 5)
+                
+                Text("Top Set")
+                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding([.bottom, .leading], 5)
+            }
+            ForEach(viewModel.setHistory[ind].indices, id: \.self) { index in
+                HStack {
+                    Text("\(viewModel.setHistory[ind][index].count)x \(viewModel.setHistory[ind][index].name)")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding([.leading], 5)
+                        .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+                    Text("\(String(format: "%.1f", viewModel.setHistory[ind][index].topKg)) kg x \(viewModel.setHistory[ind][index].topReps) reps")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding([.leading], 5)
+                        .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+                }
             }
 
 
