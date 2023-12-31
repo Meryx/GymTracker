@@ -48,7 +48,7 @@ struct WorkoutHistoryPaneView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding([.leading], 5)
                         .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
-                    Text("\(String(format: "%.1f", viewModel.setHistory[ind][index].topKg)) kg x \(viewModel.setHistory[ind][index].topReps) reps")
+                    Text("\(String(format: "%.1f", viewModel.setHistory[ind][index].topKg)) kg x \(viewModel.setHistory[ind][index].topReps)")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding([.leading], 5)
                         .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
