@@ -10,6 +10,40 @@ import SwiftUI
 struct WorkoutHistoryView: View {
     @EnvironmentObject var viewModel: ProgramListViewModel
     @EnvironmentObject var databaseManager: DatabaseManager
+    
+    struct MonthYear: Hashable {
+        let month: Int
+        let year: Int
+    }
+    
+    struct MonthSection {
+        let month: String
+        let year: String
+        let items: [ExerciseHistory]
+    }
+    
+    func groupItemsByMonth() -> [MonthSection] {
+        let calendar = Calendar.current
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM" // Format for full month name
+
+        let groupedDictionary = Dictionary(grouping: viewModel.history) { item -> MonthYear in
+            let month = calendar.component(.month, from: item.date)
+            let year = calendar.component(.year, from: item.date)
+            return MonthYear(month: month, year: year)
+        }
+
+        return groupedDictionary.map { key, items in
+            let monthName = dateFormatter.monthSymbols[key.month - 1]
+            // Convert year to String without comma
+            let yearString = String(key.year)
+            return MonthSection(month: monthName, year: yearString, items: items)
+        }.sorted { $0.year < $1.year || ($0.year == $1.year && $0.month < $1.month) }
+    }
+
+
+    
+    
     var body: some View {
         VStack{
             Text("History")
@@ -18,10 +52,23 @@ struct WorkoutHistoryView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             ScrollView {
-                ForEach(viewModel.history.indices, id: \.self) {index in
-                    WorkoutHistoryPaneView(history: viewModel.history[viewModel.history.endIndex - 1 - index], ind: index)
-                    
+                
+                ForEach(groupItemsByMonth(), id: \.month) { monthSection in
+                    Section(header:
+                                
+                                Text("\(monthSection.month.uppercased()) \(monthSection.year)")
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            
+                    ) {
+                        ForEach(monthSection.items.indices, id: \.self) { index in
+                            WorkoutHistoryPaneView(history: monthSection.items[index], ind: index)
+                            
+                        }
+                    }
                 }
+                
             }
         }
         .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -45,10 +92,10 @@ struct GymTrackerView: View {
     var body: some View {
         TabView
         {
-
-                NavigationStack {
-                    ProgramListView()
-                }
+            
+            NavigationStack {
+                ProgramListView()
+            }
             
             .tabItem {
                 Label("Home", systemImage: "house")
@@ -61,8 +108,4 @@ struct GymTrackerView: View {
         }
         
     }
-}
-
-#Preview {
-    GymTrackerView()
 }

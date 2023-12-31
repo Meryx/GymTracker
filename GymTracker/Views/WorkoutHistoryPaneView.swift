@@ -16,6 +16,8 @@ struct WorkoutHistoryPaneView: View {
     @State private var refreshKey = UUID()
     @State var ind: Int
     
+    
+    
     var body: some View {
         VStack {
             Text(history.dayName)
@@ -33,12 +35,12 @@ struct WorkoutHistoryPaneView: View {
                 Text("Exercise")
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding([.bottom, .leading], 5)
+                    .padding([.top, .leading], 5)
                 
                 Text("Top Set")
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding([.bottom, .leading], 5)
+                    .padding([.top, .leading], 5)
             }
             ForEach(viewModel.setHistory[ind].indices, id: \.self) { index in
                 HStack {
