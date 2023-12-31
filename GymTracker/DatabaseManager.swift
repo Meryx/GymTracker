@@ -23,16 +23,16 @@ class DatabaseManager: ObservableObject {
         
         let databaseFilePath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)/db.sqlite3"
         
-        let fileManager = FileManager.default
-        
-        //        if fileManager.fileExists(atPath: databaseFilePath) {
-        //            do {
-        //                try fileManager.removeItem(atPath: databaseFilePath)
-        //                print("Existing database deleted.")
-        //            } catch {
-        //                print("Error deleting database: \(error)")
-        //            }
-        //        }
+//        let fileManager = FileManager.default
+//        
+//                if fileManager.fileExists(atPath: databaseFilePath) {
+//                    do {
+//                        try fileManager.removeItem(atPath: databaseFilePath)
+//                        print("Existing database deleted.")
+//                    } catch {
+//                        print("Error deleting database: \(error)")
+//                    }
+//                }
         
         
         do {

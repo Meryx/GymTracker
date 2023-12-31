@@ -48,10 +48,18 @@ struct WorkoutHistoryPaneView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding([.leading], 5)
                         .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
-                    Text("\(String(format: "%.1f", viewModel.setHistory[ind][index].topKg)) kg x \(viewModel.setHistory[ind][index].topReps)")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding([.leading], 5)
-                        .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+                    HStack(spacing: 0) {
+                        Text("\(String(format: "%.1f", viewModel.setHistory[ind][index].topKg))")
+                            .frame(width: 50, alignment: .leading)
+                            .padding([.leading], 5)
+                            .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+                            .frame(alignment: .leading)
+                        Text(" kg x \(viewModel.setHistory[ind][index].topReps)")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.bottom, index == viewModel.setHistory[ind].endIndex - 1 ? 10 : 0)
+
+                    }
+                    
                 }
             }
 
@@ -66,7 +74,3 @@ struct WorkoutHistoryPaneView: View {
 
     }
 }
-
-//#Preview {
-//    WorkoutHistoryPaneView()
-//}
