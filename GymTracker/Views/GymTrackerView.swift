@@ -40,11 +40,24 @@ struct WorkoutHistoryView: View {
             return MonthSection(month: monthName, year: yearString, items: items)
         }.sorted { $0.year < $1.year || ($0.year == $1.year && $0.month < $1.month) }
     }
-
+    
+    func findCount(_ arr: [MonthSection], _ ind: Int) -> Int {
+        if ind == 0 {
+            return 0;
+        }
+        var sum = 0
+        for i in 0..<ind {
+            sum = sum + arr[arr.count - i - 1].items.count
+        }
+        return sum
+    }
+    
+    
 
     
     
     var body: some View {
+        let x = groupItemsByMonth()
         VStack{
             Text("History")
                 .font(.title)
@@ -53,17 +66,17 @@ struct WorkoutHistoryView: View {
             
             ScrollView {
                 
-                ForEach(groupItemsByMonth(), id: \.month) { monthSection in
+                ForEach(x.indices, id: \.self) { uIndex in
                     Section(header:
                                 
-                                Text("\(monthSection.month.uppercased()) \(monthSection.year)")
+                                Text("\(x[x.count - uIndex - 1].month.uppercased()) \(x[x.count - uIndex - 1].year)")
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                             
                             
                     ) {
-                        ForEach(monthSection.items.indices, id: \.self) { index in
-                            WorkoutHistoryPaneView(history: monthSection.items[index], ind: index)
+                        ForEach(x[x.count - uIndex - 1].items.indices, id: \.self) { index in
+                            WorkoutHistoryPaneView(history: x[x.count - uIndex - 1].items[x[x.count - uIndex - 1].items.count - index - 1], ind: index + findCount(x,uIndex))
                             
                         }
                     }
@@ -78,7 +91,7 @@ struct WorkoutHistoryView: View {
             viewModel.history = databaseManager.fetchAllExerciseHistory()
             if viewModel.history.count > 0 {
                 for i in 0...viewModel.history.count - 1 {
-                    let his = viewModel.history[viewModel.history.endIndex - 1 - i]
+                    let his = viewModel.history[viewModel.history.count - i - 1]
                     viewModel.setHistory.append(databaseManager.fetchAllSetHistories(historyId: his.historyId))
                     
                 }
