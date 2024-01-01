@@ -81,9 +81,13 @@ struct AddCaloriesPrompt: View {
 
 struct NutritionView: View {
     @State private var currentCalories: Double = 0
+    @State private var currentProtein: Double = 0
     @State private var maxCalories: Double = 2000
+    @State private var targetProtein: Double = 160
     @State private var showPrompt = false
     @State private var showSetPrompt = false
+    @State private var showProteinPrompt = false
+    @State private var showProteinSetPrompt = false
     
     func addCalories(_ calories: Double) {
             currentCalories = currentCalories + calories
@@ -91,6 +95,14 @@ struct NutritionView: View {
     
     func setCalories(_ calories: Double) {
             maxCalories = calories
+        }
+    
+    func addProtein(_ calories: Double) {
+            currentProtein = currentProtein + calories
+        }
+    
+    func setProtein(_ calories: Double) {
+        targetProtein = calories
         }
     var body: some View {
         ZStack {
@@ -138,6 +150,49 @@ struct NutritionView: View {
                     })
                     .buttonStyle(.borderedProminent)
                 }
+                HStack {
+                    Text("Protein  ")
+                        .frame(alignment: .leading)
+                        .foregroundColor(.white)
+                    GeometryReader { geometry in
+
+                            Text(String(Int(currentProtein)))
+                            .fontWeight(.bold)
+                            .animation(.linear, value: currentProtein/targetProtein)
+                            .frame(width: geometry.size.width * (currentProtein/targetProtein) < 50 ? 50 : min(geometry.size.width, geometry.size.width * CGFloat(currentProtein/targetProtein)), alignment: .trailing)
+                        
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: 20)
+                    
+                }
+                HStack {
+                    Text("Protein  ")
+
+                                // Displaying the progress bar
+                                ProgressBar(value: currentProtein / targetProtein)
+                                    .frame(height: 20)
+
+                                // Add buttons or inputs to update `currentCalories`
+                                // For example, a button to simulate calorie consumption
+                                
+                            
+                }
+                HStack {
+                    Button(action: {
+                        showProteinSetPrompt = true
+                    }, label: {
+                        Text("Set Daily Protein")
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(.borderedProminent)
+                    Button(action: {
+                        showProteinPrompt = true
+                    }, label: {
+                        Text("Add Protein")
+                            .frame(maxWidth: .infinity)
+                    })
+                    .buttonStyle(.borderedProminent)
+                }
                 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -149,6 +204,14 @@ struct NutritionView: View {
             
             if showSetPrompt {
                 AddCaloriesPrompt(show: $showSetPrompt, onMutation: setCalories)
+            }
+            
+            if showProteinPrompt {
+                AddCaloriesPrompt(show: $showProteinPrompt, onMutation: addProtein)
+            }
+            
+            if showProteinSetPrompt {
+                AddCaloriesPrompt(show: $showProteinSetPrompt, onMutation: setProtein)
             }
             
             
