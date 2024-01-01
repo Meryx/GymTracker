@@ -101,6 +101,11 @@ struct GymTrackerView: View {
                 Label("Home", systemImage: "house")
             }
             
+            NutritionView()
+                .tabItem {
+                    Label("Nutrition", systemImage: "person")
+                }
+            
             WorkoutHistoryView()
                 .tabItem {
                     Label("History", systemImage: "hourglass")

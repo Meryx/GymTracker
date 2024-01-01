@@ -18,6 +18,7 @@
 		E4234E112B3D301800EB2542 /* ProgramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4234E102B3D301800EB2542 /* ProgramView.swift */; };
 		E4234E132B3D30BE00EB2542 /* DayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4234E122B3D30BE00EB2542 /* DayView.swift */; };
 		E4234E152B3D314500EB2542 /* ExerciseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4234E142B3D314500EB2542 /* ExerciseRowView.swift */; };
+		E463B6232B42830800338661 /* NutritionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E463B6222B42830800338661 /* NutritionView.swift */; };
 		E47301852B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47301842B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift */; };
 		E47301882B344123004CFBE9 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = E47301872B344123004CFBE9 /* SQLite */; };
 		E473018C2B344499004CFBE9 /* GymTrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E473018B2B344499004CFBE9 /* GymTrackerView.swift */; };
@@ -58,6 +59,7 @@
 		E4234E102B3D301800EB2542 /* ProgramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramView.swift; sourceTree = "<group>"; };
 		E4234E122B3D30BE00EB2542 /* DayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayView.swift; sourceTree = "<group>"; };
 		E4234E142B3D314500EB2542 /* ExerciseRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseRowView.swift; sourceTree = "<group>"; };
+		E463B6222B42830800338661 /* NutritionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionView.swift; sourceTree = "<group>"; };
 		E47301842B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutHistoryPaneView.swift; sourceTree = "<group>"; };
 		E47301892B344261004CFBE9 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		E473018B2B344499004CFBE9 /* GymTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTrackerView.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 				E4234E122B3D30BE00EB2542 /* DayView.swift */,
 				E4234E142B3D314500EB2542 /* ExerciseRowView.swift */,
 				E4919CBD2B3EFF69009730D1 /* DayPaneView.swift */,
+				E463B6222B42830800338661 /* NutritionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				E47301852B31D5E3004CFBE9 /* WorkoutHistoryPaneView.swift in Sources */,
 				E4919CBE2B3EFF69009730D1 /* DayPaneView.swift in Sources */,
 				E4234E152B3D314500EB2542 /* ExerciseRowView.swift in Sources */,
+				E463B6232B42830800338661 /* NutritionView.swift in Sources */,
 				E4126D682B126BDA0046F233 /* GymTrackerApp.swift in Sources */,
 				E4234E112B3D301800EB2542 /* ProgramView.swift in Sources */,
 			);
