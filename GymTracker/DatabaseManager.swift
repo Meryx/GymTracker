@@ -98,6 +98,12 @@ class DatabaseManager: ObservableObject {
         let topKg = Expression<Double>("topKg")
         let topReps = Expression<Int64>("topReps")
         
+        let nutrition = Table("Nutrition")
+        let nutId = Expression<Int64>("nutId")
+        let calories = Expression<Double>("calorie")
+        let protein = Expression<Double>("protein")
+        let dateConsumed = Expression<Date>("date")
+        
         do {
             // Check if the 'programs' table already exists
             if try db?.scalar(programs.exists) ?? false {
@@ -159,6 +165,14 @@ class DatabaseManager: ObservableObject {
                 t.column(topKg)
                 t.column(topReps)
                 t.foreignKey(setExerciseHistoryId, references: exerciseHistory, historyId)
+                
+                
+            })
+            try db?.run(nutrition.create { t in
+                t.column(nutId, primaryKey: .autoincrement)
+                t.column(calories)
+                t.column(protein)
+                t.column(dateConsumed)
             })
         } catch {
             print("Unable to create tables: \(error)")
